@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="iadmin"
+  id="myeclipse.1443417930796"
+  context-root="/iadmin"
+  j2ee-spec="5.0"
+  archive="iadmin.war">
+  <attributes>
+    <attribute name="webrootdir" value="/WebRoot" />
+  </attributes>
+</project-module>
+
