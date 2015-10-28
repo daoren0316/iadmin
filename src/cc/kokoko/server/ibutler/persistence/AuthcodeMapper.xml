@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.AuthcodeMapper">
+	
+	<insert id="createAuthcode" parameterType="cc.kokoko.server.ibutler.domain.Authcode" >
+	INSERT INTO i_authcode (authcodeStr, phoneNumber, createdTime)
+	VALUES(#{authcodeStr,jdbcType=VARCHAR},#{phoneNumber,jdbcType=VARCHAR}, NOW())
+	</insert>
+	
+	<select id="getAuthcodeByPhoneNumber" parameterType="cc.kokoko.server.ibutler.domain.Authcode"
+            resultType="cc.kokoko.server.ibutler.domain.Authcode">
+		SELECT * FROM  `i_authcode` 
+		WHERE 
+		<![CDATA[
+			timediff(NOW(), createdTime) < '00:10:00'
+		]]>
+		AND
+			phoneNumber = #{phoneNumber} 
+		AND 
+			authcodeStr=#{authcodeStr} 
+		LIMIT 1
+	</select>
+</mapper>

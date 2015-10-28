@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.SysActivityMapper">
+
+    <!--
+        获取可用的活动配置
+    -->
+    <select id="loadSysActivity" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.SysActivityConfig">
+        select * from sys_activity_config where flag = #{flag}
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+    <!--
+        获取活动返还金额的总和
+    -->
+    <select id="getBackMoneyTotal" resultType="java.lang.Double">
+       select sum(amount) amount from sys_activity_log
+    </select>
+
+    <!--
+        根据户号获取返还金额的总和
+    -->
+    <select id="getBackMoneyTotalByHouseId" parameterType="java.lang.Long" resultType="java.lang.Double">
+         select sum(amount) amount from sys_activity_log where houseId = #{houseId}
+    </select>
+
+    <!--
+        添加返还记录
+    -->
+    <insert id="insertSysActivityLog" parameterType="cc.kokoko.server.ibutler.domain.SysActivityLog">
+        insert into sys_activity_log(uid,houseId,amount,createdTime,isBack)
+        values (
+             #{uid},
+             #{houseId},
+             #{amount},
+             NOW(),
+             #{isBack}
+        )
+    </insert>
+
+    <!--
+        修改系统活动状态
+    -->
+    <update id="updateSysActivityFlag" parameterType="map">
+        update sys_activity_config
+        <set>
+            flag = #{flag},
+            updateTime = NOW()
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--
+        获取系统活动记录
+    -->
+    <select id="getSysActivityRecord" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.SysActivityConfig">
+        select * from sys_activity_config where 1=1
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY createdTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取系统活动总条数
+    -->
+    <select id="getSysActivityCount" parameterType="map" resultType="java.lang.Long">
+        select count(id) from sys_activity_config where 1=1
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY createdTime DESC
+    </select>
+
+    <!--
+        配置系统活动
+     -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.SysActivityConfig">
+        insert into sys_activity_config(money,startTime,endTime,createdTime,updateTime,flag,note)
+        values (
+            #{money},
+            #{startTime},
+            #{endTime},
+            NOW(),
+            NOW(),
+            0,
+            #{note}
+        )
+    </insert>
+
+    <!--
+        根据编号获取活动配置详细
+    -->
+    <select id="getSysActivityConfigById" parameterType="java.lang.Long"
+            resultType="cc.kokoko.server.ibutler.domain.SysActivityConfig">
+        select * from sys_activity_config where id=#{id} LIMIT 1
+    </select>
+
+    <!--
+        获取活动返还记录
+    -->
+    <select id="getSysActivityLogRecord" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.SysActivityLog">
+        SELECT log.*,(select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=log.houseId) publicAddress
+        FROM sys_activity_log log where 1=1
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(log.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(log.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and log.houseId=#{houseId}
+        </if>
+        ORDER BY log.createdTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取活动返还记录总条数
+    -->
+    <select id="getSysActivityLogCount" parameterType="map" resultType="java.lang.Long">
+        SELECT count(log.id)
+        FROM sys_activity_log log where 1=1
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(log.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(log.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and log.houseId=#{houseId}
+        </if>
+        ORDER BY log.createdTime
+    </select>
+
+    <!--
+        添加数据
+    -->
+    <insert id="insertDatProtect" parameterType="cc.kokoko.server.ibutler.domain.kdt.DatProtect">
+        insert into dat_protect(telephone,protectName,protectOrder,time,note,createdTime,updateTime,flag)
+        values (
+          #{telephone},
+          #{protectName},
+          #{protectOrder},
+          #{time},
+          #{note},
+          NOW(),
+          NOW(),
+          #{flag}
+        )
+    </insert>
+
+</mapper>

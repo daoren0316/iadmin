@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.HouseMapper">
+	<select id="getCityList" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.City">
+		SELECT * FROM  `i_city` WHERE provinceAbbre = #{provinceAbbre}
+	</select>
+	
+	<select id="getCityById" parameterType="int" resultType="cc.kokoko.server.ibutler.domain.City">
+		SELECT * FROM  `i_city` WHERE cityId = #{id}
+	</select>
+	
+	<select id="getCommunityList" parameterType="int" resultType="cc.kokoko.server.ibutler.domain.Community">
+		SELECT * FROM  `i_community` WHERE cityId = #{cityId}
+	</select>
+	
+	<select id="getCommunityById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Community">
+		SELECT * FROM  `i_community` WHERE communityId = #{id}
+	</select>
+	
+	<select id="getBuildingList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Building">
+		SELECT * FROM  `i_building` WHERE communityId = #{communityId}
+	</select>
+	
+	<select id="getBuildingById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Building">
+		SELECT * FROM  `i_building` WHERE buildingId = #{id}
+	</select>
+	
+	<select id="getUnitList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Unit">
+		SELECT * FROM  `i_unit` WHERE buildingId = #{buildingId}
+	</select>
+	
+	<select id="getUnitById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Unit">
+		SELECT * FROM  `i_unit` WHERE unitId = #{id}
+	</select>
+	
+	<select id="getHouseList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.House">
+		SELECT * FROM  `i_house` WHERE unitId = #{unitId}
+	</select>
+	
+	<select id="getHouseById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.House">
+		SELECT * FROM  `i_house` WHERE 	houseId = #{id}
+	</select>
+	
+	<select id="getUserHouse" parameterType="map" resultType="map">
+		SELECT * FROM  `i_user_house` WHERE uid = #{uid} AND houseId=#{houseId} LIMIT 1
+	</select>
+	
+	<insert id="createUserHouse" parameterType="map">
+	INSERT INTO i_user_house (pkId, uid, houseId) values (#{pkId}, #{uid}, #{houseId})
+	</insert>
+	
+	<select id="getUserHouseList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.House">
+		SELECT h . * 
+		FROM  `i_house` AS h
+		LEFT JOIN i_user_house AS u ON u.houseId = h.houseId
+		WHERE u.uid =#{uid}
+	</select>
+	
+	<delete id="delUserHouseByPkId" parameterType="string">
+	DELETE FROM i_user_house WHERE pkId = #{pkId}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <package name="site" namespace="/site" extends="json-default">
+        <interceptors>
+            <interceptor name="authentication"
+                         class="cc.kokoko.server.ibutler.web.interceptor.LogonInterceptor"/>
+            <interceptor name="exceptionHandle"
+                         class="cc.kokoko.server.ibutler.web.interceptor.ExceptionInterceptor"/>
+
+            <interceptor name="token"
+                         class="org.apache.struts2.interceptor.TokenInterceptor"/>
+
+            <interceptor-stack name="guest">
+                <interceptor-ref name="defaultStack"/>
+                <interceptor-ref name="exceptionHandle"/>
+            </interceptor-stack>
+
+            <interceptor-stack name="adminUser">
+                <interceptor-ref name="guest"/>
+                <interceptor-ref name="authentication"/>
+            </interceptor-stack>
+
+            <interceptor-stack name="user-submit">
+                <interceptor-ref name="token"/>
+                <interceptor-ref name="adminUser"/>
+            </interceptor-stack>
+        </interceptors>
+
+        <default-interceptor-ref name="adminUser"/>
+
+        <global-results>
+            <!-- 配置dwz的返回参数 -->
+            <result name="outer" type="json">
+                <param name="root">dwz</param>
+                <!--
+                    解决struts2 返回json是，在ie，360等浏览器中弹出下载框的问题。
+                -->
+                <param name="contentType">text/html</param>
+            </result>
+            <result name="adminLogin">/WEB-INF/login.jsp</result>
+            <result name="unhandledException">/WEB-INF/jsp/common/error.jsp</result>
+            <result name="serviceError">/WEB-INF/jsp/common/service_error.jsp</result>
+            <result name="error">/WEB-INF/jsp/common/error.jsp</result>
+            <result name="input">/WEB-INF/jsp/common/service_error.jsp</result>
+            <result name="common_msg">/WEB-INF/jsp/common/msg.jsp</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping exception="java.lang.Exception"
+                               result="unhandledException"/>
+            <exception-mapping
+                    exception="cc.kokoko.server.commons.exception.ServiceException"
+                    result="serviceError"/>
+        </global-exception-mappings>
+
+
+        <!-- 小站基本信息 -->
+        <action name="site_*" method="{1}" class="siteAction">
+            <result name="toUpdate">/WEB-INF/jsp/site/site/update.jsp</result>
+            <result name="lookupSite">/WEB-INF/jsp/site/site/lookupSite.jsp</result>
+        </action>
+
+        <action name="charge_*" method="{1}" class="chargeAction">
+            <result name="success">/WEB-INF/jsp/site/charge/record.jsp</result>
+            <result name="toQueryAmount">/WEB-INF/jsp/site/charge/query.jsp</result>
+            <result name="toCharge">/WEB-INF/jsp/site/charge/charge.jsp</result>
+            <result name="toRefund">/WEB-INF/jsp/site/refund/refund.jsp</result>
+            <result name="refund">/WEB-INF/jsp/site/refund/confirm.jsp</result>
+            <result name="confirm">/WEB-INF/jsp/site/charge/confirm.jsp</result>
+            <result name="toWyFee">/WEB-INF/jsp/site/charge/wyFee.jsp</result>
+            <result name="toTcFee">/WEB-INF/jsp/site/charge/tcFee.jsp</result>
+            <result name="LookupHouse">/WEB-INF/jsp/site/charge/LookupHouse.jsp</result>
+        </action>
+
+        <!-- 团购 -->
+        <action name="commodity_*" method="{1}" class="commodityAction">
+            <result name="success">/WEB-INF/jsp/site/commodity/record.jsp</result>
+            <result name="toInsert">/WEB-INF/jsp/site/commodity/insert.jsp</result>
+            <result name="toUpdate">/WEB-INF/jsp/site/commodity/update.jsp</result>
+        </action>
+
+        <!-- 订单管理 -->
+        <action name="order_*" method="{1}" class="orderAction">
+            <result name="success">/WEB-INF/jsp/site/order/record.jsp</result>
+        </action>
+
+        <!--商户pos机绑定信息-->
+        <action name="pos_*" method="{1}" class="posAction">
+            <result name="success">/WEB-INF/jsp/site/pos/posRecord.jsp</result>
+            <result name="toInsert">/WEB-INF/jsp/site/pos/insert.jsp</result>
+            <result name="toUpdate">/WEB-INF/jsp/site/pos/update.jsp</result>
+            <result name="lookupShop">/WEB-INF/jsp/site/pos/lookupShop.jsp</result>
+        </action>
+
+        <!-- 投诉报修 -->
+        <action name="feedback_*" method="{1}" class="feedbackAction">
+            <result name="success">/WEB-INF/jsp/site/feedback/record.jsp</result>
+            <result name="toTSIndex">/WEB-INF/jsp/site/feedback/tsRecord.jsp</result>
+            <result name="toBxIndex">/WEB-INF/jsp/site/feedback/bxRecord.jsp</result>
+            <result name="toUpdate">/WEB-INF/jsp/site/feedback/update.jsp</result>
+            <result name="toShowImg">/WEB-INF/jsp/site/feedback/showImg.jsp</result>
+        </action>
+
+        <!-- 查看留言 -->
+        <action name="message_*" method="{1}" class="messageAction">
+            <result name="success">/WEB-INF/jsp/site/message/record.jsp</result>
+            <result name="toReply">/WEB-INF/jsp/site/message/reply.jsp</result>
+        </action>
+
+        <!-- 活动管理 -->
+        <action name="activity_*" method="{1}" class="activityAction">
+            <result name="success">/WEB-INF/jsp/site/activity/record.jsp</result>
+            <result name="toInsert">/WEB-INF/jsp/site/activity/insert.jsp</result>
+            <result name="toUpdate">/WEB-INF/jsp/site/activity/update.jsp</result>
+            <result name="toLook">/WEB-INF/jsp/site/activity/look.jsp</result>
+        </action>
+
+        <!-- 广告管理 -->
+        <action name="advertisement_*" method="{1}" class="advertisementAction">
+            <result name="success">/WEB-INF/jsp/site/advertisement/record.jsp</result>
+            <result name="toInsert">/WEB-INF/jsp/site/advertisement/insert.jsp</result>
+            <result name="toUpdate">/WEB-INF/jsp/site/advertisement/update.jsp</result>
+        </action>
+
+        <!-- 卡片管理 -->
+        <action name="card_*" method="{1}" class="cardAction">
+            <result name="success">/WEB-INF/jsp/site/card/record.jsp</result>
+            <result name="toGrant">/WEB-INF/jsp/site/card/grant.jsp</result>
+            <result name="confirm">/WEB-INF/jsp/site/card/confirm.jsp</result>
+            <result name="toCancel">/WEB-INF/jsp/site/card/cancel.jsp</result>
+            <result name="confirmCancel">/WEB-INF/jsp/site/card/confirmCancel.jsp</result>
+        </action>
+
+        <!-- 商户，小区关联关系管理 -->
+        <action name="shopLocation_*" method="{1}" class="shopLocationAction">
+            <result name="success">/WEB-INF/jsp/site/shopLocation/record.jsp</result>
+            <result name="toInsert">/WEB-INF/jsp/site/shopLocation/insert.jsp</result>
+        </action>
+
+    </package>
+
+
+</struts>

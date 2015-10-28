@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.SmsMapper">
+	
+	<insert id="createSmsMT" parameterType="cc.kokoko.server.ibutler.domain.Authcode" useGeneratedKeys="true"
+		keyProperty="id">
+	INSERT INTO chuanmen.mmSmsMT (mobile, content,sendtime, status)
+	VALUES(#{mobile},#{content}, NOW(), 0)
+	</insert>
+	
+	<insert id="createSmsMTBuffer" parameterType="cc.kokoko.server.ibutler.domain.Authcode" useGeneratedKeys="true"
+		keyProperty="id">
+	INSERT INTO chuanmen.mmSmsMTBuffer (id, mobile, content, sendtime,status)
+	VALUES(#{id}, #{mobile},#{content}, NOW(), 0)
+	</insert>
+</mapper>

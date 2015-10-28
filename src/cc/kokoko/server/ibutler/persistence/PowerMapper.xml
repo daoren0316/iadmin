@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.PowerMapper">
+
+    <!--
+        添加权限信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Power">
+        insert into i_power(parent,powerName,powerUrl,powerLevel,rel,target,title,width,height,attribute,sort)
+        values(
+             #{parent},
+             #{powerName},
+             #{powerUrl},
+             #{powerLevel},
+             #{rel},
+             #{target},
+             #{title},
+             #{width},
+             #{height},
+             #{attribute},
+             #{sort}
+        )
+    </insert>
+
+    <!--
+       修改权限信息
+   -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.Power">
+        update i_power
+        <set>
+            parent = #{parent},
+            powerName = #{powerName},
+            powerUrl = #{powerUrl},
+            powerLevel = #{powerLevel},
+            rel = #{rel},
+            target = #{target},
+            title = #{title},
+            width = #{width},
+            height = #{height},
+            attribute = #{attribute},
+            sort = #{sort}
+        </set>
+        where powerId = #{powerId}
+    </update>
+
+    <!--
+        根据编号获取权限信息
+    -->
+    <select id="getPowerById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Power">
+          select p.*,ps.powerName parentName from i_power p LEFT JOIN i_power ps ON p.parent = ps.powerId
+          where p.powerId = #{powerId} LIMIT 1
+    </select>
+
+    <!--
+       获取所有左侧菜单权限信息
+    -->
+    <select id="getAllLeftPower" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Power">
+        SELECT p.* from i_user u,i_usertype ut,i_user_role ur,i_role r,i_role_power rp,i_power p
+            where u.userType = ut.typeFlag
+            and ut.typeId = ur.typeId
+            and ur.roleId = r.roleId
+            and r.roleId = rp.roleId
+            and rp.powerId = p.powerId
+            and u.uid = #{userId}
+            and r.flag=0
+            and p.powerLevel <![CDATA[  < 2 ]]>
+            ORDER BY p.sort ASC
+    </select>
+
+    <!--
+        获取操作权限信息
+    -->
+    <select id="loadTodoPower" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Power">
+        SELECT p.* from i_user u,i_usertype ut,i_user_role ur,i_role r,i_role_power rp,i_power p
+            where u.userType = ut.typeFlag
+            and ut.typeId = ur.typeId
+            and ur.roleId = r.roleId
+            and r.roleId = rp.roleId
+            and rp.powerId = p.powerId
+            and u.uid = #{uid}
+            and r.flag=0
+            and p.powerLevel > 1
+            and p.powerUrl!=''
+            and p.parent = (SELECT powerId from i_power where powerUrl like CONCAT('%',#{term},'%') ORDER BY powerId ASC LIMIT 1)
+            ORDER BY p.powerId ASC
+    </select>
+    <!--
+        获取权限信息
+    -->
+    <select id="getAllPower" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Power">
+        select * from i_power
+        <where>
+            <if test="powerId!=null">
+                parent = #{powerId}
+            </if>
+            <if test="powerId==null">
+                powerLevel = 0
+            </if>
+        </where>
+        ORDER BY sort ASC
+    </select>
+
+    <!--
+        获取权限信息
+         LIMIT #{start}, #{pagesize}
+    -->
+    <select id="getPowerRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Power">
+        select * from i_power
+        where 1=1
+        <if test="powerName!=null and powerName!=''">
+            and powerName like CONCAT('%',#{powerName},'%')
+        </if>
+        ORDER BY sort ASC
+    </select>
+
+    <!--
+        获取权限信息总条数
+    -->
+    <select id="getPowerCount" parameterType="map" resultType="java.lang.Long">
+        select count(powerId) from i_power
+        where 1=1
+        <if test="powerName!=null and powerName!=''">
+            and powerName like CONCAT('%',#{powerName},'%')
+        </if>
+    </select>
+
+    <!--
+        根据角色编号，权限编号获取关联信息
+    -->
+    <select id="getRolePowerByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.RolePower">
+        select * from i_role_power
+        where roleId = #{roleId}
+        and powerId = #{powerId}
+        LIMIT 1
+    </select>
+
+    <!--
+        删除权限信息
+    -->
+    <delete id="delete" parameterType="long">
+           delete from i_power where powerId = #{powerId}
+    </delete>
+
+    <!--
+        删除管理信息
+    -->
+    <delete id="deleteRolePower" parameterType="long">
+        delete from i_role_power where powerId = #{powerId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.CarMapper">
+
+	
+	
+	<insert id="createCar" parameterType="cc.kokoko.server.ibutler.domain.Car">
+	INSERT  INTO i_car
+	(uid, carNumber, createTime)
+	values(#{uid}, #{carNumber}, NOW())
+	</insert>
+	
+	<delete id="deleteCar" parameterType="long">
+	delete from i_car
+	where carId = #{carId}
+	</delete>
+	
+	<select id="getCarList"  parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Car">
+	select * from i_car where uid = #{uid}
+	</select>
+	
+	<select id="getCarByCarId"  parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Car">
+	select * from i_car where carId = #{carId} LIMIT 1
+	</select>
+	
+	<update id="updateCar" parameterType="cc.kokoko.server.ibutler.domain.Car">
+	UPDATE i_car SET carNumber=#{carNumber} WHERE carId = #{carId}
+	</update>
+	
+	
+</mapper>

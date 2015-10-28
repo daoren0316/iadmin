@@ -1,0 +1,26 @@
+@charset "utf-8";
+/* CSS Document */
+
+body,div,span,p,ul,ol,li,table,tr,td,h1,h2,h3,h4,h5,h6,img,hr {margin:0; padding:0;}
+
+
+.top{height:auto; width:100%;  margin:0px auto; }
+.footer{height:auto; width:100%; overflow:hidden; margin:0px auto; text-align:center }
+.center{ width:94%; height:auto;margin:0px auto;  }
+.btn{width:100%; height:auto;margin:0px auto;}
+.btn ul{width:100%; height:auto;margin:0px; padding:0px;}
+.btn ul li{ list-style-type:none; width:30%; float:left; margin:5px;}
+.btn ul li img{ width:100%;}
+.list{width:100%; height:auto;margin:0px auto; padding:0px;}
+.list ul{width:100%; height:auto;margin:0px; padding:0px;}
+.list ul li{ width:100%; float:left;list-style-type:none; background:#FFF; margin-bottom:15px;}
+.list ul li p{ float:right; width:47%; overflow:hidden; margin:3px;}
+.list ul li p img{ height:145px; margin-top:10px;}
+.list ul li dl{float:left; width:47%; overflow:hidden; text-align:center;padding:5px;}
+.list ul li dl dt{ height:30px; line-height:30px; font-family:"微软雅黑"; margin:5px 0 5px 5px; border-bottom:1px #f4a69c solid;border-top:1px #f4a69c solid;}
+.list ul li dl dd{ line-height:20px; padding:0px; margin:0px;}
+.shijian{ font-size:10px;font-family:"微软雅黑";}
+.daojishi{ line-height:30px; height:25px;font-size:12px; padding:5px; background:#f4a69c;font-family:"微软雅黑"; color:#FFF;border-radius:20px;}
+.daojishi span { line-height:25px; height:25px;}
+.content{ font-size:12px; line-height:25px;font-family:"微软雅黑";}
+.none{ display:none}

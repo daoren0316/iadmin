@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+
+    <package name="lifetime" namespace="/lifetime" extends="struts-default">
+
+        <action name="main" method="toMain" class="photoAction">
+            <result name="success">/WEB-INF/jsp/lifetime/photo/index.jsp</result>
+            <result name="error">/WEB-INF/jsp/lifetime/photo/error.jsp</result>
+        </action>
+
+        <action name="detail" method="toDetail" class="photoAction">
+        	<result name="success">/WEB-INF/jsp/lifetime/photo/detail.jsp</result>
+            <result name="error">/WEB-INF/jsp/lifetime/photo/error.jsp</result>
+        </action>
+
+        <action name="test" method="toTest" class="photoAction">
+            <result name="success">/WEB-INF/jsp/lifetime/photo/test.jsp</result>
+        </action>
+
+        <action name="kdt" method="Statistics" class="kdtApiAction">
+        </action>
+
+        <action name="load" method="toLoad" class="photoAction">
+        </action>
+        
+        <action name="praise" method="toPraise" class="photoAction">
+        </action>
+        
+        <action name="addcomment" method="toAddComment" class="photoAction">
+        </action>
+    </package>
+
+</struts>

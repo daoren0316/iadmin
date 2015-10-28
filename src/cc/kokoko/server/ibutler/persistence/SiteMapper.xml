@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.SiteMapper">
+
+    <!--
+        添加服务小站信息
+    -->
+    <insert id="insertSite" parameterType="cc.kokoko.server.ibutler.domain.Site">
+         insert into i_site(siteId,siteName,logoUrl,createdTime,siteDesc,signature,siteAddress,communityId)
+          values (
+              #{siteId},
+              #{siteName},
+              #{logoUrl},
+              NOW(),
+              #{siteDesc},
+              #{signature},
+              #{siteAddress},
+              #{communityId}
+          )
+    </insert>
+
+
+    <select id="getSiteDetailById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Site">
+	select * from i_site where siteId = #{siteId}
+	</select>
+
+    <select id="getSiteDetailByCommunityId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Site">
+	select * from i_site where communityId  = #{communityId}
+	</select>
+
+
+    <select id="getConsultantList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Consultant">
+	select * from i_consultant where communityId = #{communityId}
+	</select>
+
+
+    <select id="getConsultantById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Consultant">
+	select * from i_consultant where consultantId = #{consultantId} LIMIT 1
+	</select>
+
+    <select id="getAdvertisementList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Advertise">
+	select * from i_advertisement WHERE communityId = #{communityId}  LIMIT 5
+	</select>
+
+    <!--
+        修改服务小站信息
+    -->
+    <update id="updateSiteById" parameterType="cc.kokoko.server.ibutler.domain.Site">
+        update i_site
+        <set>
+            <if test="siteName != null">siteName=#{siteName},</if>
+            <if test="logoUrl != null">logoUrl=#{logoUrl},</if>
+            <if test="siteDesc != null">siteDesc=#{siteDesc},</if>
+            <if test="signature != null">signature=#{signature},</if>
+            <if test="siteAddress != null">siteAddress=#{siteAddress},</if>
+        </set>
+        WHERE siteId=#{siteId}
+    </update>
+
+
+    <!--
+        获取所有服务小站信息
+    -->
+    <select id="getAllSiteRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Site">
+        select * from i_site
+        where 1=1
+        <if test="siteName!=null and siteName!=''">
+            and siteName like CONCAT('%',#{siteName},'%')
+        </if>
+        ORDER BY siteId DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取所有服务小站信息总条数
+    -->
+    <select id="getAllSiteCount" parameterType="map" resultType="java.lang.Long">
+        select count(*) from i_site
+        where 1=1
+        <if test="siteName!=null and siteName!=''">
+            and siteName like CONCAT('%',#{siteName},'%')
+        </if>
+    </select>
+
+</mapper>

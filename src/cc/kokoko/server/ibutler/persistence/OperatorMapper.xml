@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.OperatorMapper">
+
+    <!--
+        获取操作员信息
+    -->
+    <select id="getOperatorRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Operator">
+        SELECT
+        o.*,
+        (select CONCAT(city.cityName,ic.communityName) communityName from i_community ic,i_city city
+        where ic.cityId = city.cityId and ic.communityId = o.communityId LIMIT 1) communityName,
+        (select ut.typeName from i_usertype ut where ut.typeFlag=o.userType) userTypeName
+        FROM i_operator o
+        where o.userType!=99 and o.userStatus=0
+        <if test="communityId!=null and communityId>0">
+            and o.communityId = #{communityId}
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and o.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="nickname!=null and nickname!='' ">
+            and o.nickname like CONCAT('%',#{nickname},'%')
+        </if>
+        ORDER BY createdTime desc LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取操作员信息总条数
+    -->
+    <select id="getOperatorCount" parameterType="map" resultType="java.lang.Long">
+        SELECT count(o.id) FROM i_operator o
+        where o.userType!=99 and o.userStatus=0
+        <if test="communityId!=null and communityId>0">
+            and o.communityId = #{communityId}
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and o.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="nickname!=null and nickname!='' ">
+            and o.nickname like CONCAT('%',#{nickname},'%')
+        </if>
+    </select>
+
+    <!--
+        添加信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Operator">
+        insert into i_operator(uid,username, password,token,gender,nickname,phoneNumber,userType,userStatus,userFlag,communityId,createdTime,updateTime)
+        values (
+            #{uid},
+            #{username},
+            #{password},
+            #{token},
+            #{gender},
+            #{nickname},
+            #{phoneNumber},
+            #{userType},
+            #{userStatus},
+            #{userFlag},
+            #{communityId},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!--
+        根据编号获取信息
+    -->
+    <select id="getOperatorById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Operator">
+        SELECT * FROM i_operator where id = #{id} LIMIT 1
+    </select>
+
+    <!--
+        修改信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.Operator">
+        update i_operator
+        <set>
+            username = #{username},
+            password = #{password},
+            gender = #{gender},
+            nickname = #{nickname},
+            phoneNumber = #{phoneNumber},
+            userType = #{userType},
+            userStatus = #{userStatus},
+            userFlag = #{userFlag},
+            communityId = #{communityId},
+            updateTime = NOW()
+        </set>
+        where id= #{id}
+    </update>
+
+    <!--
+        删除信息
+    -->
+    <delete id="delete" parameterType="long">
+        delete from i_operator where id=#{id}
+    </delete>
+
+    <!--
+        检测操作员是否存在
+    -->
+    <select id="checkOperatorByName" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.Operator">
+          SELECT * FROM i_operator where username = #{username} LIMIT 1
+    </select>
+
+    <!--
+        根据用户名密码获取信息
+    -->
+    <select id="getOperatorByUnamePassword" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Operator">
+          SELECT * FROM i_operator where username = #{username} and password = #{password} LIMIT 1
+    </select>
+
+    <!--
+        修改操作员状态
+    -->
+    <update id="updateOperator" parameterType="map">
+        update i_operator
+        <set>
+            <if test="password!=null">
+                password = #{password},
+            </if>
+            <if test="userStatus!=null">
+                userStatus = #{userStatus},
+            </if>
+            <if test="userFlag!=null">
+                userFlag = #{userFlag},
+            </if>
+            updateTime = NOW()
+        </set>
+        where id= #{id}
+    </update>
+
+</mapper>

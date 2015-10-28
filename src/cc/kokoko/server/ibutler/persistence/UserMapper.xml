@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.UserMapper">
+
+    <!--
+        添加用户信息
+    -->
+    <insert id="addUser" parameterType="cc.kokoko.server.ibutler.domain.User" useGeneratedKeys="true"
+            keyProperty="uid">
+		INSERT  INTO i_user(username,email,password,token,regTime, updateTime,profileImage,gender,nickname,phoneNumber,houseId,userType,communityId,appStatus,cardStatus,publicAddress)
+		 VALUES(
+             #{username},
+             #{email},
+             #{password},
+             #{token},
+             NOW(),
+             NOW(),
+             #{profileImage},
+             #{gender},
+             #{nickname},
+             #{phoneNumber},
+             #{houseId},
+             #{userType},
+             #{communityId},
+             #{appStatus},
+             #{cardStatus},
+             #{publicAddress})
+	</insert>
+
+
+    <insert id="registerUser" parameterType="cc.kokoko.server.ibutler.domain.User" useGeneratedKeys="true"
+            keyProperty="uid">
+		INSERT  INTO i_user(nickname, password, gender,
+		profileImage, token,  regTime, updateTime, email, phoneNumber,appStatus,cardStatus)
+		VALUES
+		(#{nickname},
+		 #{password},
+		 #{gender},
+		 #{profileImage},
+		 #{token},
+		 NOW(), 
+		 NOW(),
+		 #{email},
+		 #{phoneNumber},
+		 #{appStatus},
+         #{cardStatus})
+	</insert>
+
+    <insert id="createXMPPUser" parameterType="cc.kokoko.server.ibutler.domain.xmpp.OpenFireUser">
+		insert into openfire_db.ofUser
+		(username, encryptedPassword, name, email, creationDate, modificationDate)
+		values
+		(#{username,jdbcType=VARCHAR}, #{encryptedPassword,jdbcType=VARCHAR},
+		#{name,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR}, 
+		#{creationDate,jdbcType=CHAR},#{modificationDate,jdbcType=CHAR})
+
+	</insert>
+
+
+    <select id="getUserByUid" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where uid=#{uid} LIMIT 1
+	</select>
+
+    <select id="getUserByEmail" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where email=#{email} LIMIT 1
+	</select>
+
+    <select id="getUserByHouseId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.User">
+      select * from i_user where houseId=#{houseId}
+    </select>
+
+    <select id="getUserByType" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.User">
+      select * from i_user where userType=#{userType}
+    </select>
+
+    <select id="getOwnerUserByHouseId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.User">
+      select u.* from i_money_account m,i_user u where m.ownerUid = u.uid and m.houseId=#{houseId} LIMIT 1
+    </select>
+
+    <select id="getUserByPhoneNumber" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where phoneNumber=#{phoneNumber} AND userType = 0 LIMIT 1
+	</select>
+
+    <select id="getHouseByPhoneNumber" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.dto.UserDTO">
+	select u.uid,u.username,u.nickname,u.phoneNumber,u.publicAddress,u.appStatus,u.cardStatus,h.houseId,h.houseTitle,h.communityId
+	 from i_user u,i_house h where u.houseId = h.houseId and u.phoneNumber=#{phoneNumber} LIMIT 1
+	</select>
+
+    <select id="getUserByNickname" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where nickname=#{nickname} LIMIT 1
+	</select>
+
+    <select id="getUserByUsername" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where username=#{username} LIMIT 1
+	</select>
+    <!--
+      根据用户名和密码获取用户信息
+    -->
+    <select id="getUserByUnamePassword" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.User">
+	select * from i_user where username=#{username} and password=#{password} LIMIT 1
+	</select>
+
+    <update id="updateUser" parameterType="cc.kokoko.server.ibutler.domain.User">
+        UPDATE
+        i_user
+        <set>
+            <if test="profileImage != null">profileImage=#{profileImage},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="houseId != null">houseId=#{houseId},</if>
+            <if test="nickname != null">nickname=#{nickname},</if>
+            <if test="password != null">password=#{password},</if>
+            <if test="publicAddress != null">publicAddress=#{publicAddress},</if>
+            <if test="phoneNumber != null">phoneNumber=#{phoneNumber},</if>
+            <if test="roomNo != null">roomNo=#{roomNo},</if>
+            <if test="communityId != null">communityId=#{communityId},</if>
+            <if test="appStatus != null">appStatus=#{appStatus},</if>
+            <if test="cardStatus != null">cardStatus=#{cardStatus},</if>
+            updateTime=NOW()
+        </set>
+        where
+        uid=#{uid} LIMIT 1
+    </update>
+
+    <update id="updateUserToken" parameterType="cc.kokoko.server.ibutler.domain.User">
+        UPDATE
+        i_user
+        <set>
+            token=#{token},
+            updateTime=NOW()
+        </set>
+        where
+        uid=#{uid} LIMIT 1
+    </update>
+
+
+    <update id="changePassword" parameterType="cc.kokoko.server.ibutler.domain.User">
+	UPDATE
+	 i_user 
+	 SET password = #{password}
+	where 
+	 uid=#{uid}
+	</update>
+
+    <select id="getOpenFireUser" resultType="cc.kokoko.server.ibutler.domain.xmpp.OpenFireUser">
+	select * from openfire_db.ofUser where username=#{username} LIMIT 1
+	</select>
+
+
+    <select id="getUserList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.User">
+	SELECT * 
+		FROM  `i_user`
+
+    ORDER BY uid DESC
+    LIMIT #{start}, #{pagesize}
+		
+	</select>
+
+
+    <select id="getIOSUserList" resultType="cc.kokoko.server.ibutler.domain.User">
+	SELECT * 
+		FROM  `i_user`
+	WHERE
+		`deviceToken` !=  ''
+	</select>
+
+
+    <select id="getXMPPOnlineUser" resultType="cc.kokoko.server.ibutler.domain.xmpp.XMPPOnlineUser">
+	select * from userStatus
+	</select>
+
+
+    <select id="getUserDeviceList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.UserDevice">
+		SELECT 
+			*
+		FROM  
+			i_user_device
+		WHERE
+			uid = #{uid}
+	</select>
+
+    <select id="getUserDevice" parameterType="cc.kokoko.server.ibutler.domain.UserDevice"
+            resultType="cc.kokoko.server.ibutler.domain.UserDevice">
+		SELECT 
+			*
+		FROM  
+			i_user_device
+		WHERE
+			uid = #{uid}
+			AND deviceId=#{deviceId}
+	</select>
+
+
+    <insert id="addUserDevice" parameterType="cc.kokoko.server.ibutler.domain.UserDevice">
+	INSERT  INTO i_user_device
+	(uid, deviceId, postTime)
+	values(#{uid}, #{deviceId}, NOW())
+	</insert>
+
+    <delete id="deleteUserDevice" parameterType="cc.kokoko.server.ibutler.domain.UserDevice">
+	delete from i_user_device
+	where deviceId = #{deviceId} AND uid=#{uid}
+	</delete>
+
+    <insert id="addToDeviceBlacklist" parameterType="string">
+	INSERT  INTO i_device_blacklist
+	(deviceId)
+	values(#{deviceId})
+	</insert>
+
+    <delete id="deleteFromDeviceBlacklist" parameterType="string">
+	delete from i_device_blacklist
+	where deviceId = #{deviceId}
+	</delete>
+
+    <select id="getDeviceIdFromDeviceBlacklist" parameterType="string" resultType="string">
+	select deviceId from i_device_blacklist where deviceId = #{deviceId}
+	</select>
+
+
+    <insert id="addFavorite" parameterType="cc.kokoko.server.ibutler.domain.Favorite">
+	INSERT  INTO i_favorite
+	(favType, favTitle, favPicUrl, referId, favTime, uid)
+	values(#{favType}, #{favTitle}, #{favPicUrl}, #{referId}, NOW(), #{uid})
+	</insert>
+
+    <select id="getFavoritelist" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Favorite">
+	select * from i_favorite where uid = #{uid}
+	</select>
+
+    <select id="getFavorite" parameterType="cc.kokoko.server.ibutler.domain.Favorite"
+            resultType="cc.kokoko.server.ibutler.domain.Favorite">
+	select * from i_favorite 
+	where 
+		uid = #{uid} 
+	AND 
+		referId = #{referId} 
+	AND 
+		favType = #{favType}
+	LIMIT 1
+	</select>
+
+    <delete id="delFavorite" parameterType="cc.kokoko.server.ibutler.domain.Favorite">
+	DELETE FROM i_favorite 
+	where 
+		uid = #{uid} 
+	AND 
+		referId = #{referId} 
+	AND 
+		favType = #{favType}
+	</delete>
+
+    <insert id="createBDPushUser" parameterType="cc.kokoko.server.ibutler.domain.BDPushUser">
+	INSERT INTO i_bdpush_user
+	(uid, bdUserId, bdChannelId, updateTime)
+	VALUES(#{uid}, #{bdUserId}, #{bdChannelId}, NOW())
+	</insert>
+
+    <select id="getBDPushUserByUid" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.BDPushUser">
+	SELECT * from i_bdpush_user where uid = #{uid}
+	</select>
+
+    <update id="updateBDPushUser" parameterType="cc.kokoko.server.ibutler.domain.BDPushUser">
+        UPDATE
+        i_bdpush_user
+        <set>
+            bdUserId=#{bdUserId},
+            bdChannelId=#{bdChannelId},
+            updateTime=NOW()
+        </set>
+        where
+        uid=#{uid}
+    </update>
+
+    <select id="getUserScore" parameterType="long" resultType="int">
+	select score from i_user where uid=#{uid}
+	</select>
+
+    <select id="getUserType" parameterType="long" resultType="byte">
+	select userType from i_user where uid=#{uid}
+	</select>
+
+    <select id="getShopPhoneNumber" parameterType="long" resultType="string">
+	select phoneNumber from i_shop where shopId=#{shopId} LIMIT 1
+	</select>
+
+    <select id="getUserPhoneNumber" parameterType="long" resultType="string">
+	select phoneNumber from i_user where uid=#{uid} LIMIT 1
+	</select>
+
+    <select id="getUidByRdCardNo" parameterType="string" resultType="long">
+	select uid from rd_card where cardNo=#{cardNo} ORDER BY createdTime DESC LIMIT 1
+	</select>
+
+    <!--
+        根据卡号获取用户信息
+    -->
+    <select id="getUserByRdCardNo" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.User">
+       select u.* from i_user u, rd_card rd where u.uid=rd.uid and rd.cardNo=#{cardNo} LIMIT 1
+    </select>
+
+    <select id="getUserMoney" parameterType="long" resultType="double">
+	  select money from i_user where uid = #{uid} limit 1
+	</select>
+
+    <select id="getSiteUserByCommunityId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.User">
+        select * from i_user where communityId = #{communityId} and userType=2 LIMIT 1
+    </select>
+
+    <!-- 修改服务小站的账户余额 -->
+    <update id="updateUserMoney" parameterType="map">
+        UPDATE
+        i_user
+        <set>
+            money = money + #{amount},
+            updateTime=NOW()
+        </set>
+        where
+        uid=#{uid} LIMIT 1
+    </update>
+
+    <!--
+        检测用户名是否可用
+    -->
+    <select id="checkUserByName" parameterType="java.lang.String" resultType="cc.kokoko.server.ibutler.domain.User">
+        select * from i_user where username = #{username}  LIMIT 1
+    </select>
+
+    <!--
+        根据参数获取业主信息
+    -->
+    <select id="getOwnerRecordByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.User">
+        SELECT u.uid,u.phoneNumber,u.nickname,
+        (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=u.houseId) publicAddress,
+        u.appStatus,
+        u.cardStatus,
+        u.regTime,
+        (SELECT communityName FROM i_community where communityId=u.communityId) communityName
+        FROM i_user u
+        where u.userType=#{userType}
+        <if test="communityId!=null and communityId!=''">
+            and u.communityId = #{communityId}
+        </if>
+        <if test="phoneNumber!='' and phoneNumber!=null">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0">
+            and u.houseId = #{houseId}
+        </if>
+        ORDER BY u.regTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        根据参数获取业主信息总条数
+    -->
+    <select id="getOwnerCountByParam" parameterType="map" resultType="java.lang.Long">
+        select count(u.uid) from i_user u
+        where u.userType=#{userType}
+        <if test="communityId!=null and communityId!=''">
+            and u.communityId = #{communityId}
+        </if>
+        <if test="phoneNumber!='' and phoneNumber!=null">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0">
+            and u.houseId = #{houseId}
+        </if>
+        ORDER BY u.regTime DESC
+    </select>
+
+</mapper>

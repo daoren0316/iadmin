@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.AddressMapper">
+
+	
+	
+	<insert id="createAddress" parameterType="map">
+	INSERT  INTO i_address
+	(uid, addressDetail, createTime, houseId)
+	values(#{uid}, #{addressDetail}, NOW(), #{houseId})
+	</insert>
+	
+	<delete id="deleteAddress" parameterType="long">
+	delete from i_address
+	where addressId = #{addressId}
+	</delete>
+	
+	<select id="getAddressList"  parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Address">
+	select * from i_address where uid = #{uid}
+	</select>
+	
+	<select id="getAddressByAddressId"  parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Address">
+	select * from i_address where addressId = #{addressId}
+	</select>
+	
+	<select id="getUserAddressByHouseId"  parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Address">
+	select * from i_address where uid = #{uid} AND houseId = #{houseId} LIMIT 1
+	</select>
+	
+	<update id="updateAddress" parameterType="cc.kokoko.server.ibutler.domain.Address">
+	    UPDATE i_address SET addressDetail = #{addressDetail}, updateTime=NOW()  where uid = #{uid} AND addressId=#{addressId}
+	</update>
+	
+	
+	
+</mapper>

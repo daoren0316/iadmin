@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.ShopMapper">
+
+
+    <select id="getShopList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Shop">
+	SELECT 
+	   *, 0 as isFav
+	FROM 
+	   i_shop 
+	</select>
+
+    <select id="getLocalShopList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Shop">
+	SELECT 
+	   s.*, 0 as isFav
+	FROM 
+	   i_shop s , i_shop_location l
+	WHERE s.shopId = l.shopId
+	and s.communityId = #{communityId}
+    and s.flag = 0
+	</select>
+
+    <select id="getShopById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Shop">
+	SELECT 
+	   s.*,u.username
+	FROM 
+	   i_user u, i_shop s
+	WHERE 
+	   u.uid=s.shopId and s.shopId = #{shopId}
+	</select>
+
+
+    <select id="getShopCardList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.ShopCard">
+        SELECT
+        *
+        FROM
+        i_shop_card
+        <if test="shopId != null">
+            WHERE
+            shopId = #{shopId}
+        </if>
+    </select>
+
+    <!--
+        添加商户信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Shop">
+        insert into i_shop(shopId,shopName,shopAddress,logoUrl,shopType,createdTime,shopDesc,phoneNumber,shopDistance,signature,discount
+            ,picList,communityId)
+        values (
+           #{shopId},
+           #{shopName},
+           #{shopAddress},
+           #{logoUrl},
+           #{shopType},
+           NOW(),
+           #{shopDesc},
+           #{phoneNumber},
+           #{shopDistance},
+           #{signature},
+           #{discount},
+           #{picList},
+           #{communityId}
+        )
+    </insert>
+
+    <update id="updateShop" parameterType="cc.kokoko.server.ibutler.domain.Shop">
+        UPDATE
+        i_shop
+        <set>
+            <if test="shopName != null">shopName=#{shopName},</if>
+            <if test="shopAddress != null">shopAddress=#{shopAddress},</if>
+            <if test="logoUrl != null">logoUrl=#{logoUrl},</if>
+            <if test="shopType != null">shopType=#{shopType},</if>
+            <if test="shopDesc != null">shopDesc=#{shopDesc},</if>
+            <if test="phoneNumber != null">phoneNumber=#{phoneNumber},</if>
+            <if test="signature != null">signature=#{signature},</if>
+            <if test="picList != null">picList=#{picList},</if>
+            <if test="shopDistance != null">shopDistance=#{shopDistance},</if>
+            <if test="discount != null">discount=#{discount}</if>
+        </set>
+        where
+        shopId=#{shopId} LIMIT 1
+    </update>
+
+    <!--
+     根据参数获取商户信息
+    -->
+    <select id="getAllShopByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Shop">
+        SELECT s.*,c.communityName, 0 as isFav
+        FROM i_shop s left join i_community c
+        on s.communityId = c.communityId
+        where s.flag in (0,1)
+        <if test="communityId!=null and communityId!=''">
+            and s.communityId=#{communityId}
+        </if>
+        <if test="shopName!=null and shopName!=''">
+            and s.shopName like CONCAT('%',#{shopName},'%')
+        </if>
+        LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+     根据参数获取商户信息总条数
+    -->
+    <select id="getShopCountByParam" parameterType="map" resultType="java.lang.Long">
+        SELECT count(shopId) FROM i_shop
+        where flag in (0,1)
+        <if test="communityId!=null and communityId!=''">
+            and communityId=#{communityId}
+        </if>
+        <if test="shopName!=null and shopName!=''">
+            and shopName like CONCAT('%',#{shopName},'%')
+        </if>
+    </select>
+
+    <!-- 根据商户编号删除商户信息 -->
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from i_shop where shopId = #{shopId}
+    </delete>
+
+    <!--
+        根据小区编号获取物业商户信息
+    -->
+    <select id="getShopByCommunityId" parameterType="java.lang.Long" resultType="cc.kokoko.server.ibutler.domain.Shop">
+        select * from i_shop where communityId=#{communityId} and flag=1 LIMIT 1
+    </select>
+
+</mapper>

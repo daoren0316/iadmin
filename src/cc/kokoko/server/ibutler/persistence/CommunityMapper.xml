@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.CommunityMapper">
+
+    <!--
+        获取所有城市信息
+    -->
+    <select id="getAllCity" resultType="cc.kokoko.server.ibutler.domain.City">
+        select * from i_city
+    </select>
+
+    <!--
+        获取所有小区信息
+    -->
+    <select id="getAllCommunity" resultType="cc.kokoko.server.ibutler.domain.Community">
+        select * from i_community
+    </select>
+
+    <!--
+        根据城市编号获取所有小区信息
+    -->
+    <select id="getAllCommunityById" parameterType="java.lang.Integer"
+            resultType="cc.kokoko.server.ibutler.domain.Community">
+           select * from i_community where cityId = #{cityId}
+    </select>
+
+    <!--
+        根据小区编号获取幢信息
+    -->
+    <select id="getAllBuildingById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Building">
+            select * from i_building where communityId=#{communityId}
+    </select>
+
+    <!--
+        根据幢编号获取单元信息
+    -->
+    <select id="getAllUnitById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Unit">
+             select * from i_unit where buildingId = #{buildingId}
+    </select>
+
+    <!--
+        根据单元编号获取户信息
+    -->
+    <select id="getAllHouseById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.House">
+             select * from i_house where unitId = #{unitId}
+    </select>
+    <!--
+        添加小区信息
+    -->
+    <insert id="insertCommunity" parameterType="cc.kokoko.server.ibutler.domain.Community">
+        <selectKey keyProperty="communityId" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_community(communityName,cityId)
+        values (
+        #{communityName} ,
+        #{cityId}
+        )
+    </insert>
+
+    <!--
+        添加幢信息
+    -->
+    <insert id="insertBuilding" parameterType="cc.kokoko.server.ibutler.domain.Building">
+        <selectKey keyProperty="buildingId" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_building(buildingTitle,communityId)
+        values(
+        #{buildingTitle},
+        #{communityId}
+        )
+    </insert>
+
+    <!--
+        添加单元信息
+    -->
+    <insert id="insertUnit" parameterType="cc.kokoko.server.ibutler.domain.Unit">
+        <selectKey keyProperty="unitId" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_unit(unitName,buildingId)
+        values (
+        #{unitName},
+        #{buildingId}
+        )
+    </insert>
+
+    <!--
+        添加户号信息
+    -->
+    <insert id="insertHouse" parameterType="cc.kokoko.server.ibutler.domain.House">
+        <selectKey keyProperty="houseId" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_house(houseTitle,unitId,houseName,communityId)
+        values (
+        #{houseTitle},
+        #{unitId},
+        #{houseName},
+        #{communityId}
+        )
+    </insert>
+
+    <!--
+        获取小区信息
+    -->
+    <select id="getCommunityRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Community">
+        select cty.*,city.cityName from i_community cty
+        LEFT JOIN i_city city on cty.cityId = city.cityId
+        where 1=1
+        <if test="cityId!=null and cityId>0">
+            and cty.cityId = #{cityId}
+        </if>
+        <if test="communityName!=null and communityName!=''">
+            and cty.communityName like CONCAT('%',#{communityName},'%')
+        </if>
+        ORDER BY cty.cityId ASC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取小区信息总条数
+    -->
+    <select id="getCommunityCount" parameterType="map" resultType="java.lang.Long">
+        select count(communityId) from i_community where 1=1
+        <if test="cityId!=null and cityId>0">
+            and cityId = #{cityId}
+        </if>
+        <if test="communityName!=null and communityName!=''">
+            and communityName like CONCAT('%',#{communityName},'%')
+        </if>
+    </select>
+
+    <!--
+        获取幢信息
+    -->
+    <select id="getBuildingRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Building">
+        select b.*,c.communityName from i_building b,i_community c
+        where b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and b.communityId = #{communityId}
+        </if>
+        <if test="buildingTitle!=null and buildingTitle!=''">
+            and b.buildingTitle like CONCAT('%',#{buildingTitle},'%')
+        </if>
+        ORDER BY b.communityId ASC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取幢信息总条数
+    -->
+    <select id="getBuildingCount" parameterType="map" resultType="java.lang.Long">
+        select count(b.buildingId) from i_building b,i_community c
+        where b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and b.communityId = #{communityId}
+        </if>
+        <if test="buildingTitle!=null and buildingTitle!=''">
+            and b.buildingTitle like CONCAT('%',#{buildingTitle},'%')
+        </if>
+    </select>
+
+    <!--
+        获取单元信息
+    -->
+    <select id="getUnitReocrd" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Unit">
+        select u.*,b.buildingTitle,c.communityName from i_unit u,i_building b,i_community c
+        where u.buildingId = b.buildingId
+        and b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and c.communityId = #{communityId}
+        </if>
+        <if test="buildingId!=null and buildingId>0">
+            and u.buildingId = #{buildingId}
+        </if>
+        <if test="unitName!=null and unitName!=''">
+            and u.unitName like CONCAT('%',#{unitName},'%')
+        </if>
+        ORDER BY c.cityId ASC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取单元信息总条数
+    -->
+    <select id="getUnitCount" parameterType="map" resultType="java.lang.Long">
+        select count(u.unitId) from i_unit u,i_building b,i_community c
+        where u.buildingId = b.buildingId
+        and b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and c.communityId = #{communityId}
+        </if>
+        <if test="buildingId!=null and buildingId>0">
+            and u.buildingId = #{buildingId}
+        </if>
+        <if test="unitName!=null and unitName!=''">
+            and u.unitName like CONCAT('%',#{unitName},'%')
+        </if>
+    </select>
+
+    <!--
+        获取户信息
+    -->
+    <select id="getHouseReocrd" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.House">
+        select h.*,u.unitName,b.buildingTitle,c.communityName from i_house h,i_unit u,i_building b,i_community c
+        where h.unitId = u.unitId
+        and u.buildingId = b.buildingId
+        and b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and c.communityId = #{communityId}
+        </if>
+        <if test="buildingId!=null and buildingId>0">
+            and b.buildingId = #{buildingId}
+        </if>
+        <if test="unitId!=null and unitId>0">
+            and h.unitId = #{unitId}
+        </if>
+        <if test="houseName!=null and houseName!=''">
+            and h.houseName like CONCAT('%',#{houseName},'%')
+        </if>
+        ORDER BY c.cityId ASC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取户信息总条数
+    -->
+    <select id="getHouseCount" parameterType="map" resultType="java.lang.Long">
+        select count(h.houseId) from i_house h,i_unit u,i_building b,i_community c
+        where h.unitId = u.unitId
+        and u.buildingId = b.buildingId
+        and b.communityId = c.communityId
+        <if test="communityId!=null and communityId>0">
+            and c.communityId = #{communityId}
+        </if>
+        <if test="buildingId!=null and buildingId>0">
+            and b.buildingId = #{buildingId}
+        </if>
+        <if test="unitId!=null and unitId>0">
+            and h.unitId = #{unitId}
+        </if>
+        <if test="houseName!=null and houseName!=''">
+            and h.houseName like CONCAT('%',#{houseName},'%')
+        </if>
+    </select>
+
+    <!--
+        根据参数验证小区是否存在
+    -->
+    <select id="checkCommunity" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.Community">
+          select * from i_community
+           where communityName = #{communityName}
+              and cityId = #{cityId} LIMIT 1
+    </select>
+
+    <!--
+        根据参数验证幢是否存在
+    -->
+    <select id="checkBuilding" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.Building">
+          select * from i_building
+           where buildingTitle = #{buildingTitle}
+              and communityId = #{communityId} LIMIT 1
+    </select>
+
+    <!--
+        根据参数验证幢是否存在
+    -->
+    <select id="checkUnit" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.Unit">
+          select * from i_unit
+           where unitName = #{unitName}
+              and buildingId = #{buildingId} LIMIT 1
+    </select>
+
+    <!--
+        根据参数验证户是否存在
+    -->
+    <select id="checkHouse" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.House">
+          select * from i_house
+           where houseName = #{houseName}
+              and unitId = #{unitId} LIMIT 1
+    </select>
+
+    <!--
+         根据编号获取单元信息
+    -->
+    <select id="getUnitById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Unit">
+         select u.*,b.buildingTitle,c.communityId,c.communityName from i_unit u,i_building b,i_community c
+            where u.buildingId = b.buildingId
+            and b.communityId = c.communityId
+            and u.unitId = #{unitId} LIMIT 1
+    </select>
+
+    <!--
+        根据小区编号获取幢信息
+    -->
+    <select id="getBuildingByCId" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Building">
+           select * from i_building
+           where communityId = #{communityId}
+    </select>
+
+    <!--
+        根据幢编号获取单元信息
+    -->
+    <select id="getUnitByBId" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Unit">
+            select * from i_unit
+           where buildingId = #{buildingId}
+    </select>
+
+    <!--
+        根据单元编号获取户号信息
+    -->
+    <select id="getHouseByUId" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.House">
+            select * from i_house
+           where  unitId = #{unitId}
+    </select>
+
+    <!--
+        根据户号获取业主地址
+    -->
+    <select id="getUserAddrByHouseId" parameterType="java.lang.Long" resultType="java.lang.String">
+         select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId and c.cityId =city.cityId and  h.houseId=#{houseId} LIMIT 1
+    </select>
+
+    <!--
+        获取小区的名称
+    -->
+    <select id="getCommunityName" parameterType="java.lang.Long" resultType="java.lang.String">
+        select CONCAT(city.cityName,ic.communityName) communityName
+        from i_community ic,i_city city
+        where ic.cityId = city.cityId and ic.communityId = #{communityId}  LIMIT 1
+    </select>
+
+    <!--
+        根据户号获取小区信息
+    -->
+    <select id="getCommunityByHouseId" parameterType="java.lang.Long" resultType="cc.kokoko.server.ibutler.domain.Community">
+        select c.*,city.cityName
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId and c.cityId =city.cityId and  h.houseId=#{houseId} LIMIT 1
+    </select>
+
+</mapper>

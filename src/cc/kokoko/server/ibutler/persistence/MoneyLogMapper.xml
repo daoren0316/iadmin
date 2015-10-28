@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.MoneyLogMapper">
+
+
+    <select id="getMoneyLogById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.MoneyLog">
+	SELECT 
+	   *
+	FROM 
+	   i_money_log 
+	WHERE 
+	   id = #{id}
+	</select>
+
+    <select id="getTradeList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Trade">
+	SELECT 
+	   id AS tradeId, amount, tradeTime, note
+	FROM 
+	   i_money_log 
+	WHERE 
+	   uid = #{uid} AND tradeType IN (2,3,5,6,7)
+	</select>
+
+    <select id="getChargeList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Charge">
+	SELECT 
+	   id AS chargeId, amount, tradeTime AS chargeTime, note
+	FROM 
+	   i_money_log 
+	WHERE 
+	   uid = #{uid} AND tradeType IN (1,4,8)
+	</select>
+
+    <select id="getChargeListByHouseId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Charge">
+	SELECT 
+	   id AS chargeId, amount, tradeTime AS chargeTime, note
+	FROM 
+	   i_money_log 
+	WHERE 
+	   houseId = #{houseId} AND tradeType IN (1,4,8)
+	</select>
+
+
+    <select id="getTradeById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Trade">
+	SELECT 
+		id AS tradeId, amount, tradeTime, note 
+	FROM 
+		i_fee 
+	WHERE 
+		id = #{id}
+	</select>
+
+    <select id="getChargeById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Charge">
+	SELECT 
+		id AS chargeId, amount, tradeTime AS chargeTime, note
+	FROM 
+		i_fee 
+	WHERE 
+		id = #{id}
+	</select>
+
+    <insert id="createMoneyLog" parameterType="cc.kokoko.server.ibutler.domain.MoneyLog">
+	INSERT INTO i_money_log (uid, amount, tradeTime, tradeType, note, houseId,orderId)
+	VALUES(#{uid}, #{amount}, NOW(),#{tradeType}, #{note}, #{houseId},#{orderId})
+	</insert>
+
+    <select id="getUserBalance" parameterType="long" resultType="double">
+	SELECT money FROM i_user WHERE uid= #{uid}
+	</select>
+
+
+    <select id="getMoneyAccount" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.MoneyAccount">
+	    SELECT * FROM i_money_account WHERE houseId= #{houseId}
+	</select>
+
+    <insert id="createMoneyAccount" parameterType="cc.kokoko.server.ibutler.domain.MoneyAccount">
+	INSERT INTO i_money_account
+	(houseId,balance, ownerUid, createdTime, updateTime,ciphertext)
+	VALUES(#{houseId},#{balance}, #{ownerUid}, NOW(), NOW(),#{ciphertext})
+	</insert>
+
+    <select id="getFamilyMemberList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.FamilyMember">
+	    SELECT  u.phoneNumber, u.nickname AS memberName, u.profileImage, h.uid as memberId, h.houseId, h.uid AS memberId, h.isAccepted, h.isPaymentAllowed, h.isMaster
+FROM  `i_user_house` AS h
+LEFT JOIN i_user AS u ON u.uid = h.uid
+WHERE h.houseId =#{houseId} and h.uid != #{memberId}
+	</select>
+
+    <select id="getSearchFamilyMemberList" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.FamilyMember">
+	    SELECT u.phoneNumber,  u.nickname AS memberName, u.profileImage, h.uid as memberId, h.houseId, h.uid AS memberId, h.isAccepted, h.isPaymentAllowed, h.isMaster
+FROM  `i_user_house` AS h
+LEFT JOIN i_user AS u ON u.uid = h.uid
+WHERE h.houseId =#{houseId} and u.phoneNumber={phoneNumber}
+	</select>
+
+
+    <select id="getFamilyMember" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.FamilyMember">
+	    SELECT  u.nickname AS memberName, u.profileImage, h.uid as memberId, h.houseId, h.uid AS memberId, h.isAccepted, h.isPaymentAllowed, h.isMaster
+FROM  `i_user_house` AS h
+LEFT JOIN i_user AS u ON u.uid = h.uid
+WHERE h.houseId =#{houseId} and h.uid =#{memberId}
+LIMIT 1
+	</select>
+
+    <update id="updateFamilyMember" parameterType="cc.kokoko.server.ibutler.domain.FamilyMember">
+	UPDATE i_user_house SET isAccepted=#{isAccepted},
+	isPaymentAllowed=#{isPaymentAllowed},
+	isMaster=#{isMaster}
+	WHERE uid=#{memberId} AND houseId=#{houseId}
+	</update>
+
+    <select id="getOrderList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Order">
+	select * from i_order where uid=#{uid} and tradeStatus=#{tradeStatus}
+	</select>
+
+    <select id="getOrderById" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.Order">
+	select * from i_order where orderId=#{orderId}
+	</select>
+
+    <insert id="createOrder" parameterType="cc.kokoko.server.ibutler.domain.Order" useGeneratedKeys="true"
+            keyProperty="orderId">
+	INSERT INTO i_order
+	(uid, amount, createedTime, orderType, content, paymentStatus, tradeStatus, shopId, updateTime, picUrl, commodityTitle, commodityId, savingsAmount)
+	VALUES(#{uid}, #{amount} , #{createedTime}, #{orderType}, #{content}, #{paymentStatus}, #{tradeStatus}, #{shopId}, NOW(), #{picUrl}, #{commodityTitle}, #{commodityId}, #{savingsAmount})
+	</insert>
+
+    <update id="changeAccountBalance" parameterType="map">
+	UPDATE i_money_account SET balance=balance + (#{amount}), updateTime = NOW()
+	WHERE  houseId=#{houseId}
+	</update>
+
+    <update id="changeAccountPassword" parameterType="map">
+	UPDATE i_money_account SET password=#{password}, ciphertext=#{ciphertext},  updateTime = NOW()
+	WHERE  houseId=#{houseId}
+	</update>
+
+    <update id="updateOrder" parameterType="cc.kokoko.server.ibutler.domain.Order">
+        UPDATE i_order
+        <set>
+            <if test="paymentStatus != null">paymentStatus=#{paymentStatus},</if>
+            updateTime=NOW()
+        </set>
+
+        WHERE orderId=#{orderId}
+    </update>
+
+    <!--
+        获取消费记录
+        day：今日记录，week：周记录 ，month：月记录，history：历史记录
+     -->
+    <select id="getMoneyRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.dto.MoneyLogDTO">
+        SELECT ra.id,ra.createTime as tradeTime,ra.money as amount,'POS消费' as tradeType,
+        (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle)
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=rd.houseId) publicAddress
+        FROM i_receipt_account ra,rd_order rd
+        where ra.tradeId = rd.tradeId and ra.shopId =#{uid}
+        <if test="recordType!=null and recordType!='' ">
+            <choose>
+                <when test="recordType=='week' ">
+                    <![CDATA[ and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= DATE(ra.createTime)  ]]>
+                </when>
+                <when test="recordType=='month' ">
+                    <![CDATA[ and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= DATE(ra.createTime)  ]]>
+                </when>
+                <otherwise>
+                    <![CDATA[ and DATE(ra.createTime) = CURDATE() ]]>
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY ra.createTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取历史消费记录
+     -->
+    <select id="getHistoryRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.dto.MoneyLogDTO">
+		 SELECT ra.id,ra.createTime as tradeTime,ra.money as amount,'POS消费' as tradeType,
+                (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle)
+                from i_house h,i_community c,i_city city
+                where h.communityId=c.communityId
+                and c.cityId =city.cityId
+                and h.houseId=rd.houseId) publicAddress
+        FROM i_receipt_account ra,rd_order rd
+        where ra.tradeId = rd.tradeId and ra.shopId =#{uid}
+		and DATE(ra.createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+		and DATE(ra.createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+		ORDER BY ra.createTime DESC LIMIT #{start}, #{pagesize}
+	</select>
+
+    <!--
+        获取消费总金额
+    -->
+    <select id="getMoneyTotal" parameterType="map" resultType="java.lang.Double">
+        SELECT SUM(money) as money FROM i_receipt_account where shopId =#{uid}
+        <if test="recordType!=null and recordType!='' ">
+            <choose>
+                <when test="recordType=='week' ">
+                    <![CDATA[ and DATE_SUB(CURDATE(), INTERVAL 7 DAY) <= DATE(createTime)  ]]>
+                </when>
+                <when test="recordType=='month' ">
+                    <![CDATA[ and DATE_SUB(CURDATE(), INTERVAL 1 MONTH) <= DATE(createTime)  ]]>
+                </when>
+                <when test="recordType=='day' ">
+                    <![CDATA[ and DATE(createTime) = CURDATE() ]]>
+                </when>
+                <when test="recordType=='history' ">
+                    and DATE(createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+                    and DATE(createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+                </when>
+            </choose>
+        </if>
+    </select>
+
+    <!--
+      根据传入参数获取消费记录
+   -->
+    <select id="getMoneyRecordByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.dto.MoneyLogDTO">
+        SELECT id,tradeTime,amount,
+        (
+        CASE
+        when tradeType=1 THEN '充值'
+        when tradeType=8 THEN '充值'
+        when tradeType=2 THEN '消费'
+        when tradeType=5 THEN '消费'
+        when tradeType=6 THEN '消费'
+        when tradeType=7 THEN '消费'
+        when tradeType=3 THEN '转账-转出'
+        when tradeType=4 THEN '转账-转入'
+        END
+        ) tradeType,publicAddress FROM i_money_log where shopId=#{uid}
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(tradeTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(tradeTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY tradeTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+     根据传入参数获取消费记录总条数
+    -->
+    <select id="getMoneyCountByParam" parameterType="map" resultType="java.lang.Long">
+        SELECT count(id) FROM i_money_log where shopId=#{uid}
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(tradeTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(tradeTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY tradeTime DESC
+    </select>
+
+    <update id="updateTotalSavedAmount" parameterType="map">
+    UPDATE i_money_account SET totalSavedAmount = totalSavedAmount + (#{totalSavedAmount})
+    WHERE houseId = #{houseId}
+    </update>
+
+    <select id="getTotalSavedAmount" parameterType="long" resultType="double">
+	select totalSavedAmount from i_money_account where houseId = #{houseId} LIMIT 1
+	</select>
+
+    <!--
+        获取交易记录
+    -->
+    <select id="getConsumeRecordByParam" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.dto.ConsumeLogDTO">
+        select log.orderId,log.amount,log.tradeType,log.tradeTime,u.nickname,
+        (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=log.houseId) publicAddress,
+        u.phoneNumber,
+        log.note
+        from i_money_log log,i_user u
+        where u.uid=log.uid
+        and u.userType = 0
+        <if test="communityId!=null and communityId!='' ">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(log.tradeTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(log.tradeTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="tradeType!=null and tradeType!='' ">
+            and log.tradeType in (${tradeType})
+        </if>
+        <if test="houseId>0 ">
+            and log.houseId=#{houseId}
+        </if>
+        ORDER BY log.tradeTime DESC
+        <if test="start!=null and pagesize!=null">
+            LIMIT #{start}, #{pagesize}
+        </if>
+    </select>
+
+    <!--
+        获取交易记录总条数
+    -->
+    <select id="getConsumeCountByParam" parameterType="map" resultType="java.lang.Long">
+        select count(log.id) from i_money_log log,i_user u
+        where u.uid=log.uid
+        and u.userType = 0
+        <if test="communityId!=null and communityId!='' ">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(log.tradeTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(log.tradeTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="tradeType!=null and tradeType!='' ">
+            and log.tradeType in (${tradeType})
+        </if>
+        <if test="houseId>0 ">
+            and log.houseId=#{houseId}
+        </if>
+        ORDER BY log.tradeTime DESC
+    </select>
+
+    <!--
+        根据参数获取总金额
+    -->
+    <select id="getMoneyTotalByParam" parameterType="map" resultType="java.lang.Double">
+        select sum(amount) from i_money_log ml,i_user u WHERE ml.uid=u.uid and u.userType=0
+        <if test="type==1">
+            and ml.tradeType in (1,8,4)
+        </if>
+        <if test="type==2">
+            and ml.tradeType in (2,5,6,7,3)
+        </if>
+        <if test="type==3">
+            and ml.tradeType = 2
+        </if>
+        <if test="type==4">
+            and ml.tradeType = 5
+        </if>
+    </select>
+
+    <!--
+        获取业主钱包信息
+    -->
+    <select id="getOwnerWalletRecord" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.dto.OwnerWalletDTO">
+        select ma.houseId,ma.balance,ma.totalSavedAmount,ma.createdTime,ma.updateTime,u.phoneNumber,
+        (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=u.houseId) publicAddress,
+        (select sum(ml.amount) from i_money_log ml,i_user ur
+        WHERE ml.uid=ur.uid and ur.userType=0 and ml.tradeType in (1,8,4) and ur.houseId=u.houseId) chargeAmount,
+        (select sum(ml.amount) from i_money_log ml,i_user ur
+        WHERE ml.uid=ur.uid and ur.userType=0 and ml.tradeType in (2,5,6,7,3) and ur.houseId=u.houseId) consumeAmount,
+        (SELECT communityName FROM i_community where communityId=u.communityId) communityName
+        from i_money_account ma,i_user u
+        where ma.ownerUid = u.uid and u.userType=0 and ma.balance!=0
+        <if test="communityId!=null and communityId!='' ">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="phoneNumber!='' and phoneNumber!=null">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(ma.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(ma.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0">
+            and u.houseId=#{houseId}
+        </if>
+        ORDER BY ma.createdTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取业主钱包信息总条数
+    -->
+    <select id="getOwnerWalletCount" parameterType="map" resultType="java.lang.Long">
+        select count(ma.houseId)
+        from i_money_account ma,i_user u
+        where ma.ownerUid = u.uid and u.userType=0 and ma.balance!=0
+        <if test="communityId!=null and communityId!='' ">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="phoneNumber!='' and phoneNumber!=null">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(ma.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(ma.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0">
+            and u.houseId=#{houseId}
+        </if>
+        ORDER BY ma.createdTime DESC
+    </select>
+
+</mapper>

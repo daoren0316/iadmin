@@ -1,0 +1,9 @@
+.editMode{float: left;width: 100%;margin-bottom: 5px;}
+.editMode p{width: 100%;word-wrap: break-word;height:auto;float: none;}
+.editMode span{line-height: normal;}
+
+.editMode table{border-collapse:collapse;border:1px solid #999;}
+.editMode td{border:1px solid #999;padding:5px;text-align:center;background-color:#e4ebf6;}
+
+.textAreaPanel{float:left;width:100%;margin-bottom: 5px;}
+.textAreaPanel pre{line-height:18px;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;}

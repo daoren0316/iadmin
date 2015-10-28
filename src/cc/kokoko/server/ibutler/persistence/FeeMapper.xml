@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.FeeMapper">
+
+
+    <select id="getPropertyFeeList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.PropertyFee">
+	SELECT 
+	   feeId AS propertyFeeId, amount, beginDate, endDate, status, note
+	FROM 
+	   i_fee 
+	WHERE 
+	   houseId = #{houseId} AND feeType = 1
+	</select>
+
+    <select id="getCarFeeList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.CarFee">
+	SELECT 
+	   feeId AS carFeeId, amount, beginDate, endDate, status, note
+	FROM 
+	   i_fee 
+	WHERE 
+	   houseId = #{houseId} AND feeType = 2
+	</select>
+
+    <select id="getFeeAmountByFeeId" parameterType="long" resultType="double">
+	select amount from i_fee where feeId = #{feeId}
+	</select>
+
+    <select id="getFeeByFeeId" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Fee">
+	select * from i_fee where feeId = #{feeId}
+	</select>
+
+    <update id="updateFeeStatus" parameterType="long">
+	update i_fee set status = 1 where feeId=#{feeId}
+	</update>
+
+    <!--
+        添加缴费信息
+    -->
+    <insert id="insertFee" parameterType="cc.kokoko.server.ibutler.domain.Fee">
+        insert into i_fee(uid,amount,beginDate,endDate,feeType,status,note,houseId,communityId)
+        values (
+            #{uid},
+            #{amount},
+            #{beginDate},
+            #{endDate},
+            #{feeType},
+            #{status},
+            #{note},
+            #{houseId},
+            #{communityId}
+        )
+    </insert>
+
+</mapper>

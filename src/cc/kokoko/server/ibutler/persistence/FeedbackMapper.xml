@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.FeedbackMapper">
+
+    <insert id="createFeedback" parameterType="cc.kokoko.server.ibutler.domain.Feedback">
+	INSERT INTO i_feedback (type, category, content, picList, uid, communityId, postTime,flag,updateTime)
+	VALUES(
+	      #{type},
+	      #{category},
+	      #{content},
+	      #{picList},
+	      #{uid},
+	      #{communityId} ,
+	      NOW(),
+	      #{flag},
+	      NOW()
+	)
+	</insert>
+
+    <select id="getFeedbackList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Feedback">
+        SELECT f.*,u.nickname,(select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=u.houseId) publicAddress,u.phoneNumber,
+        (SELECT communityName FROM i_community where communityId=u.communityId) communityName
+        FROM i_feedback f,i_user u where f.uid = u.uid
+        <if test="communityId!=null and communityId!=''">
+            and f.communityId = #{communityId}
+        </if>
+        <if test="category!=null">
+            and f.category = #{category}
+        </if>
+        <if test="type!=null">
+            and f.type = #{type}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(f.postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(f.postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and u.houseId = #{houseId}
+        </if>
+        ORDER BY f.feedbackId DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <select id="getFeedbackCountByCommunityId" parameterType="map" resultType="int">
+        SELECT count(*) AS COUNT
+        FROM i_feedback f,i_user u
+        where f.uid = u.uid
+        <if test="communityId!=null and communityId!=''">
+            and f.communityId = #{communityId}
+        </if>
+        <if test="category!=null">
+            and f.category = #{category}
+        </if>
+        <if test="type!=null">
+            and f.type = #{type}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(f.postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(f.postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and u.houseId = #{houseId}
+        </if>
+    </select>
+
+    <select id="getFeedbackById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Feedback">
+        SELECT f.*,u.nickname,u.publicAddress,u.phoneNumber
+            FROM i_feedback f,i_user u
+        WHERE
+            feedbackId = #{feedbackId} and f.uid = u.uid LIMIT 1
+	</select>
+
+    <!--
+        修改回访信息
+    -->
+    <update id="updateFeedback" parameterType="map">
+        update i_feedback
+        <set>
+            flag = 1,
+            note = #{note},
+            operatorId = #{operatorId},
+            operatorName = #{operatorName},
+            updateTime = NOW()
+        </set>
+        where feedbackId = #{feedbackId}
+    </update>
+
+</mapper>

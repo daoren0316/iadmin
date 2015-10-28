@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.MessageMapper">
+
+    <insert id="createMessage" parameterType="cc.kokoko.server.ibutler.domain.Message" useGeneratedKeys="true"
+            keyProperty="messageId">
+		insert into i_message (fromUid, messageType, content , postTime, toUid, fromUsername , fromUserAvatar)
+		values(
+            #{fromUid},
+            #{messageType},
+            #{content},
+            NOW(),
+            #{toUid},
+            #{fromUsername},
+            #{fromUserAvatar})
+	</insert>
+
+    <insert id="addSysMessage" parameterType="cc.kokoko.server.ibutler.domain.SysMessage">
+        insert into i_sys_message (sysMessageTitle,sysMessageContent,viewCount,postTime,uid,titlePicUrl,communityId,userType,sysMessageType,referId)
+        values (
+             #{sysMessageTitle},
+             #{sysMessageContent},
+             #{viewCount},
+             NOW(),
+             #{uid},
+             #{titlePicUrl},
+             #{communityId},
+             #{userType},
+             #{sysMessageType},
+             #{referId}
+         )
+    </insert>
+
+
+    <select id="getMessageList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Message">
+        SELECT *
+        FROM `i_message`
+        <where>
+            (toUid =#{uid} OR toUid=0)
+            <if test="communityId != null">
+                OR communityId=#{communityId}
+            </if>
+        </where>
+        ORDER BY messageId DESC
+        LIMIT #{start}, #{pagesize}
+    </select>
+
+    <select id="getMessageList2" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Message">
+        SELECT *
+        FROM `i_message`
+        <where>
+            (toUid =#{uid} AND fromUid=#{toUid})
+            OR
+            (toUid =#{toUid} AND fromUid=#{uid})
+        </where>
+        ORDER BY messageId DESC
+        LIMIT #{start}, #{pagesize}
+    </select>
+
+    <select id="getMessageCount" parameterType="long" resultType="int">
+        SELECT count(*)
+        FROM `i_message`
+        <where>
+            (toUid =#{uid} OR toUid=0)
+        </where>
+    </select>
+
+    <select id="getLocalSysMessageList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.SysMessage">
+        SELECT a.*, u.nickname as username, u.profileImage as userLogoUrl
+        FROM `i_sys_message` as a left join i_user as u on a.uid=u.uid
+        WHERE
+            a.communityId = #{communityId}
+        ORDER BY a.sysMessageId DESC
+	</select>
+
+    <select id="getMessageCountByUid" parameterType="long" resultType="int">
+        SELECT count(*)
+        FROM `i_message`
+        <where>
+            (toUid =#{uid})
+        </where>
+    </select>
+
+    <select id="getLatestMessage" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Message">
+        SELECT *
+        FROM i_message
+        WHERE messageID
+        IN (
+            SELECT MAX( messageId )
+            FROM  `i_message`
+            WHERE  `toUid` =#{uid}
+            OR toUid = 0
+            GROUP BY fromUid
+            ORDER BY postTime DESC
+        )
+        ORDER BY postTime DESC
+	</select>
+
+    <!--
+        获取留言信息
+        and (toUid = #{uid} or fromUid = #{uid})
+    -->
+    <select id="getMessageRecordByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Message">
+        select * from i_message
+        where 1=1
+        <if test="uid!=null">
+            and toUid = #{uid}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY messageId DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取留言信息的总条数
+    -->
+    <select id="getMessageCountByParam" parameterType="map" resultType="java.lang.Long">
+        select count(messageId) from i_message
+        where 1=1
+        <if test="uid!=null">
+            and toUid = #{uid}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+    </select>
+
+    <!--
+        根据编号获取留言详细信息
+    -->
+    <select id="getMessageById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Message">
+       select * from i_message where messageId = #{messageId} LIMIT 1
+    </select>
+
+</mapper>

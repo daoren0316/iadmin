@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bean="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+    <bean name="adminUserAction" class="cc.kokoko.server.ibutler.web.action.AdminUserAction"
+          scope="prototype"/>
+    <bean name="adminAction" class="cc.kokoko.server.ibutler.web.action.AdminAction"
+          scope="prototype"/>
+    <bean name="consumeAction"
+          class="cc.kokoko.server.ibutler.web.action.ConsumeAction" scope="prototype"/>
+    <bean name="siteAction"
+          class="cc.kokoko.server.ibutler.web.action.site.SiteAction" scope="prototype"/>
+    <bean name="shopAction"
+          class="cc.kokoko.server.ibutler.web.action.ShopAction" scope="prototype"/>
+    <bean name="guestBookAction"
+          class="cc.kokoko.server.ibutler.web.action.GuestBookAction" scope="prototype"/>
+    <bean name="chargeAction"
+          class="cc.kokoko.server.ibutler.web.action.site.ChargeAction" scope="prototype"/>
+    <bean name="commodityAction"
+          class="cc.kokoko.server.ibutler.web.action.site.CommodityAction" scope="prototype"/>
+    <bean name="orderAction"
+          class="cc.kokoko.server.ibutler.web.action.site.OrderAction" scope="prototype"/>
+    <bean name="posAction"
+          class="cc.kokoko.server.ibutler.web.action.site.PosAction" scope="prototype"/>
+    <bean name="feedbackAction"
+          class="cc.kokoko.server.ibutler.web.action.site.FeedbackAction" scope="prototype"/>
+    <bean name="messageAction"
+          class="cc.kokoko.server.ibutler.web.action.site.MessageAction" scope="prototype"/>
+    <bean name="remittanceAction"
+          class="cc.kokoko.server.ibutler.web.action.RemittanceAction" scope="prototype"/>
+    <bean name="communityAction"
+          class="cc.kokoko.server.ibutler.web.action.CommunityAction" scope="prototype"/>
+    <bean name="buildingAction"
+          class="cc.kokoko.server.ibutler.web.action.BuildingAction" scope="prototype"/>
+    <bean name="unitAction"
+          class="cc.kokoko.server.ibutler.web.action.UnitAction" scope="prototype"/>
+    <bean name="houseAction"
+          class="cc.kokoko.server.ibutler.web.action.HouseAction" scope="prototype"/>
+    <bean name="powerAction"
+          class="cc.kokoko.server.ibutler.web.action.system.PowerAction" scope="prototype"/>
+    <bean name="roleAction"
+          class="cc.kokoko.server.ibutler.web.action.system.RoleAction" scope="prototype"/>
+    <bean name="userTypeAction"
+          class="cc.kokoko.server.ibutler.web.action.system.UserTypeAction" scope="prototype"/>
+    <bean name="activityAction"
+          class="cc.kokoko.server.ibutler.web.action.site.ActivityAction" scope="prototype"/>
+    <bean name="consultantAction"
+          class="cc.kokoko.server.ibutler.web.action.ConsultantAction" scope="prototype"/>
+    <bean name="advertisementAction"
+          class="cc.kokoko.server.ibutler.web.action.site.AdvertisementAction" scope="prototype"/>
+    <bean name="cardAction"
+          class="cc.kokoko.server.ibutler.web.action.site.CardAction" scope="prototype"/>
+    <bean name="shopLocationAction"
+          class="cc.kokoko.server.ibutler.web.action.site.ShopLocationAction" scope="prototype"/>
+    <bean name="moneyAction"
+          class="cc.kokoko.server.ibutler.web.action.system.MoneyAction" scope="prototype"/>
+    <bean name="sysActivityAction"
+          class="cc.kokoko.server.ibutler.web.action.system.SysActivityAction" scope="prototype"/>
+    <bean name="upmpChargeAction"
+          class="cc.kokoko.server.ibutler.web.upmp.ChargeAction" scope="prototype"/>
+    <bean name="accountsInfoAction"
+          class="cc.kokoko.server.ibutler.web.action.system.AccountsInfoAction" scope="prototype"/>
+    <bean name="homeOwnerAction"
+          class="cc.kokoko.server.ibutler.web.action.HomeOwnerAction" scope="prototype"/>
+    <bean name="photoAction"
+          class="cc.kokoko.server.ibutler.web.lifetime.PhotoAction" scope="prototype"/>
+
+    <!-- 微信公众号 -->
+    <bean name="weixinCoreAction"
+            class="cc.kokoko.server.ibutler.web.weixin.WeixinCoreAction" scope="prototype"></bean>
+    <!-- 口袋通 -->
+    <bean name="kdtApiAction"
+          class="cc.kokoko.server.ibutler.web.lifetime.kdt.KdtApiAction" scope="prototype"></bean>
+
+</beans>

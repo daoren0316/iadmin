@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.SysDataAnalysisMapper">
+
+    <!--
+        添加数据
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.SysDataAnalysis">
+        insert into sys_data_analysis(appDowns,cardCount,onlineChargeCount,offlineChargeCount,commodityCount,posCount,houseCardCount,houseChargeCount,houseConsumeCount,createdTime)
+        values (
+            #{appDowns},
+            #{cardCount},
+            #{onlineChargeCount},
+            #{offlineChargeCount},
+            #{commodityCount},
+            #{posCount},
+            #{houseCardCount},
+            #{houseChargeCount},
+            #{houseConsumeCount},
+            NOW()
+        )
+    </insert>
+
+    <!--
+        App下载次数
+    -->
+    <select id="getAppDowns" resultType="java.lang.Long">
+           select count(uid) from i_user where appStatus IN (1,2) and userType=0
+    </select>
+
+    <!--
+        获取发卡数
+    -->
+    <select id="getCardCount" resultType="java.lang.Long">
+        select count(id) from rd_card
+    </select>
+
+    <!--
+        获取有多少户发卡
+    -->
+    <select id="getHouseCardCount" resultType="java.lang.Long">
+         select count(DISTINCT houseId) from rd_card
+    </select>
+
+    <!--
+        根据参数获取充值，消费有多少户
+    -->
+    <select id="getHouseTradeCountByParam" parameterType="map" resultType="java.lang.Long">
+        select count(DISTINCT ml.houseId) from i_money_log ml,i_user u WHERE ml.uid=u.uid and u.userType=0
+        <if test="type==1">
+            and ml.tradeType in (1,8,4)
+        </if>
+        <if test="type==2">
+            and ml.tradeType in (2,5,6,7,3)
+        </if>
+    </select>
+
+    <!--
+        根据交易类型查询总条数
+    -->
+    <select id="getMoneyLogCountByType" parameterType="integer" resultType="java.lang.Long">
+        select count(ml.id) from i_money_log ml,i_user u WHERE ml.uid=u.uid and u.userType=0  and ml.tradeType=#{tradeType}
+    </select>
+
+    <!--
+        获取最后一条数据
+    -->
+    <select id="getLastSysDataAnalysis" resultType="cc.kokoko.server.ibutler.domain.SysDataAnalysis">
+        SELECT * FROM sys_data_analysis ORDER BY id desc LIMIT 1
+    </select>
+
+    <!--
+        获取前10条记录
+    -->
+    <select id="getTop10SysDataAnalysis" resultType="cc.kokoko.server.ibutler.domain.SysDataAnalysis">
+         SELECT * FROM sys_data_analysis ORDER BY id desc LIMIT 10
+    </select>
+
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.AdvertisementMapper">
+
+    <!--
+        获取广告信息
+    -->
+    <select id="getAdvertiseRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Advertise">
+        select adt.*,
+        (SELECT communityName FROM i_community where communityId=adt.communityId) communityName
+        from i_advertisement adt where 1=1
+        <if test="communityId!=null and communityId!=''">
+            and adt.communityId = #{communityId}
+        </if>
+        <if test="picUrl!=null and picUrl!=''">
+            and adt.picUrl like CONCAT('%',#{picUrl},'%')
+        </if>
+        ORDER BY adt.advId DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取广告信息总条数
+    -->
+    <select id="getAdvertiseCount" parameterType="map" resultType="java.lang.Long">
+        select count(advId) from i_advertisement where 1=1
+        <if test="communityId!=null and communityId!=''">
+            and communityId = #{communityId}
+        </if>
+        <if test="picUrl!=null and picUrl!=''">
+            and picUrl like CONCAT('%',#{picUrl},'%')
+        </if>
+    </select>
+
+    <!--
+        根据编号获取广告详细信息
+    -->
+    <select id="getAdvertiseById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Advertise">
+        select * from i_advertisement where advId=#{advId} LIMIT 1
+    </select>
+
+    <!--
+        添加广告信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Advertise">
+        insert into i_advertisement(picUrl,linkUrl,communityId)
+        values (
+           #{picUrl},
+           #{linkUrl},
+           #{communityId}
+        )
+    </insert>
+
+    <!--
+        修改广告信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.Advertise">
+        update i_advertisement
+        <set>
+            picUrl = #{picUrl},
+            linkUrl = #{linkUrl},
+            communityId = #{communityId}
+        </set>
+        where advId=#{advId}
+    </update>
+
+    <!--
+        根据编号删除广告
+    -->
+    <delete id="delete" parameterType="long">
+        delete from i_advertisement where advId=#{advId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.EmailMapper">
+
+	
+
+
+	<insert id="createEmail" parameterType="cc.kokoko.server.ibutler.domain.Email" useGeneratedKeys="true"
+		keyProperty="mailId">
+		
+		INSERT  INTO `ibutler_db`.`ibutler_email`(subject, sendTo, content, postTime)
+		VALUES
+		(#{subject,jdbcType=VARCHAR},
+		#{sendTo,jdbcType=VARCHAR},
+		#{content,jdbcType=VARCHAR},
+		 NOW())
+
+	</insert>
+	
+	<insert id="createEmailLog" parameterType="cc.kokoko.server.ibutler.domain.Email" useGeneratedKeys="true"
+		keyProperty="mailId">
+		
+		INSERT  INTO `ibutler_db`.`ibutler_email_log`(mailId, subject, sendTo, content, postTime)
+		VALUES
+		(#{mailId,jdbcType=BIGINT},
+		#{subject,jdbcType=VARCHAR},
+		#{sendTo,jdbcType=VARCHAR},
+		#{content,jdbcType=VARCHAR},
+		 NOW())
+
+	</insert>
+	
+	<select id="getEmailById" parameterType="int" resultType="cc.kokoko.server.ibutler.domain.Email">
+	select * from `ibutler_db`.`ibutler_email` where mailId =#{mailId} LIMIT 1
+	</select>
+
+	<delete id="deleteEmailById" parameterType="int" >
+	DELETE from `ibutler_db`.`ibutler_email` where mailId =#{mailId} LIMIT 1
+	</delete>
+</mapper>

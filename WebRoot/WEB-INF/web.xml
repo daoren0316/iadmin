@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<display-name>iadmin webapp</display-name>
+
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/iadminApplicationContext.xml</param-value>
+	</context-param>
+
+
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	
+
+	<servlet>
+		<servlet-name>ConfigInitServlet</servlet-name>
+		<servlet-class>cc.kokoko.server.commons.servlet.ConfigInitServlet</servlet-class>
+		<init-param>
+			<param-name>configFileDir</param-name>
+			<param-value>/data1/java/maxsrv/config/ibutler/</param-value>
+		</init-param>
+		<load-on-startup>2</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ConfigInitServlet</servlet-name>
+		<url-pattern>/configInitServlet</url-pattern>
+	</servlet-mapping>
+
+
+
+	<servlet>
+		<servlet-name>ConfigLoadServlet</servlet-name>
+		<servlet-class>cc.kokoko.server.ibutler.web.servlet.ConfigLoadServlet</servlet-class>
+		<load-on-startup>3</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ConfigLoadServlet</servlet-name>
+		<url-pattern>/configLoadServlet</url-pattern>
+	</servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>CoreServlet</servlet-name>
+        <servlet-class>cc.kokoko.server.ibutler.web.weixin.CoreServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CoreServlet</servlet-name>
+        <url-pattern>/CoreServlet</url-pattern>
+    </servlet-mapping>
+
+
+	<!-- encoding use utf8 start -->
+	<filter>
+		<filter-name>encoding</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>encoding</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+<!--	 encoding use utf8 end -->
+
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>*.do</url-pattern>
+	</filter-mapping>
+
+
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+</web-app>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:bean="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- 第一步: 配置好要定时调用的业务类 -->
+    <bean id="sysActivityTimer" class="cc.kokoko.server.ibutler.web.timer.SysActivityTimer"/>
+
+    <!-- 第二步: 定义好具体要使用类的哪一个业务方法 -->
+    <!-- 活动开始 -->
+    <bean id="startActivityTimerJobDetail"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 目标bean -->
+        <property name="targetObject" ref="sysActivityTimer"/>
+        <!-- 要执行目标bean的哪一个业务方法 -->
+        <property name="targetMethod" value="startActivity"/>
+        <!-- 是否并发 -->
+        <property name="concurrent" value="false"/>
+    </bean>
+    <!-- 活动结束 -->
+    <bean id="endActivityTimerJobDetail"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 目标bean -->
+        <property name="targetObject" ref="sysActivityTimer"/>
+        <!-- 要执行目标bean的哪一个业务方法 -->
+        <property name="targetMethod" value="endActivity"/>
+        <!-- 是否并发 -->
+        <property name="concurrent" value="false"/>
+    </bean>
+
+    <!-- 每天向服务小站划款 -->
+    <bean id="allotmentToSiteTimerJobDetail"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 目标bean -->
+        <property name="targetObject" ref="sysActivityTimer"/>
+        <!-- 要执行目标bean的哪一个业务方法 -->
+        <property name="targetMethod" value="allotmentToSite"/>
+        <!-- 是否并发 -->
+        <property name="concurrent" value="false"/>
+    </bean>
+
+    <!-- 第三步: 定义好调用模式: 如每隔1秒钟调用一次或每天的哪个时间调用一次等 -->
+    <bean id="startActivityTimerJobTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="startActivityTimerJobDetail"/>
+        <!-- 设置定时调用的时间规律 -->
+        <!-- 左到右按顺序代表  * * * * * * * 格式: [秒] [分] [小时] [日] [月] [周] [年]  -->
+        <!-- 每天一点扫描活动是否可以开始 -->
+        <property name="cronExpression" value="0 0 1 * * ?"/>
+    </bean>
+
+    <bean id="endActivityTimerJobTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="endActivityTimerJobDetail"/>
+        <!-- 设置定时调用的时间规律 -->
+        <!-- 左到右按顺序代表  * * * * * * * 格式: [秒] [分] [小时] [日] [月] [周] [年]  -->
+        <!-- 每天23点扫描活动是否可以结束 -->
+        <property name="cronExpression" value="0 0 22 * * ?"/>
+    </bean>
+
+    <bean id="allotmentToSiteTimerJobTime" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="allotmentToSiteTimerJobDetail"/>
+        <!-- 设置定时调用的时间规律 -->
+        <!-- 左到右按顺序代表  * * * * * * * 格式: [秒] [分] [小时] [日] [月] [周] [年]  -->
+        <!-- 每天23点扫描活动是否可以结束 -->
+        <property name="cronExpression" value="0 0 23 * * ?"/>
+    </bean>
+
+    <!--第四步 把定义好的任务放到调度（Scheduler）工厂里面,注意这里的ref bean -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="startActivityTimerJobTime"/>
+                <ref bean="endActivityTimerJobTime"/>
+                <ref bean="allotmentToSiteTimerJobTime"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

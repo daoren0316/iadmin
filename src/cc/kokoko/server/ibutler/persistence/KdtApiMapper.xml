@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cc.kokoko.server.ibutler.persistence.KdtApiMapper">
+
+    <!--
+        添加信息
+    -->
+    <insert id="addDatLifeTime" parameterType="cc.kokoko.server.ibutler.domain.kdt.DatLifeTime">
+        insert into dat_lifetime(tid,num_iid,buyer_nick,status,created,pay_time,consign_time,sign_time,createdTime,updateTime,effectiveTime,
+            bbrName,bbrPhone,bbrCard,bbrImg,bbrMessage,bbrOccupation,flag,dataSources,sign)
+        VALUES (
+              #{tid},
+              #{num_iid},
+              #{buyer_nick},
+              #{status},
+              #{created},
+              #{pay_time},
+              #{consign_time},
+              #{sign_time},
+              NOW(),
+              NOW(),
+              #{effectiveTime},
+              #{bbrName},
+              #{bbrPhone},
+              #{bbrCard},
+              #{bbrImg},
+              #{bbrMessage},
+              #{bbrOccupation},
+              #{flag},
+              #{dataSources},
+              #{sign}
+        )
+    </insert>
+
+    <!--
+        根据编号获取详细信息
+    -->
+    <select id="getDatLifeTimeById" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.kdt.DatLifeTime">
+        select * from dat_lifetime where 1=1
+        <if test="tid!=null and tid!='' ">
+            and tid = #{tid}
+        </if>
+        <if test="id!=null">
+            and id = #{id}
+        </if>
+        ORDER BY createdTime DESC LIMIT 1
+    </select>
+
+    <!--
+        修改数据
+    -->
+    <update id="updateDatLifeTime"  parameterType="cc.kokoko.server.ibutler.domain.kdt.DatLifeTime">
+        update dat_lifetime
+        <set>
+            buyer_nick=#{buyer_nick},
+            status=#{status},
+            created=#{created},
+            pay_time=#{pay_time},
+            consign_time=#{consign_time},
+            sign_time=#{sign_time},
+            updateTime=NOW(),
+            effectiveTime=#{effectiveTime},
+            bbrName=#{bbrName},
+            bbrPhone=#{bbrPhone},
+            bbrCard=#{bbrCard},
+            bbrImg=#{bbrImg},
+            bbrMessage=#{bbrMessage},
+            bbrOccupation=#{bbrOccupation},
+            flag=#{flag},
+            dataSources=#{dataSources},
+            sign=#{sign}
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--
+        获取数据
+    -->
+    <select id="getKdtShowRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.kdt.dto.KdtShowDTO">
+        select id,tid,status,pay_time,effectiveTime,buyer_nick,bbrName,bbrImg,bbrMessage,bbrCard,bbrPhone,bbrOccupation,createdTime
+        from dat_lifetime
+        where status in (4,5)
+        and flag = 0
+        <if test="bbrCard!=null and bbrCard!=''">
+            and bbrCard = #{bbrCard}
+        </if>
+        ORDER BY effectiveTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取数据总条数
+    -->
+    <select id="getKdtShowCount" parameterType="map" resultType="java.lang.Long">
+        select count(id) from dat_lifetime
+        where status in (4,5)
+        and flag = 0
+        <if test="bbrCard!=null and bbrCard!=''">
+            and bbrCard = #{bbrCard}
+        </if>
+    </select>
+
+    <!--
+        删除信息
+    -->
+    <delete id="delete" parameterType="long" >
+        delete from dat_lifetime where id= #{id}
+    </delete>
+
+    <!--
+        清除数据
+    -->
+    <delete id="deleteData">
+        delete from dat_lifetime where status not in (4,5)
+    </delete>
+
+</mapper>

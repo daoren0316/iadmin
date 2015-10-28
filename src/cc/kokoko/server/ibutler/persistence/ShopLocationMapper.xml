@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.ShopLocationMapper">
+
+    <!--
+        获取商户，小区关联记录
+    -->
+    <select id="getShopLocationList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.ShopLocation">
+        select l.*,s.shopName,s.shopAddress,s.phoneNumber,
+        (SELECT communityName FROM i_community where communityId=l.communityId) communityName
+        from i_shop_location l left join i_shop s
+        on l.shopId = s.shopId
+        where s.flag = 0
+        <if test="communityId!=null and communityId!=''">
+            and l.communityId = #{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(l.createdtime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(l.createdtime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY l.createdtime desc LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取商户，小区关联记录总条数
+    -->
+    <select id="getShopLocationCount" parameterType="map" resultType="java.lang.Long">
+        select count(l.id) from i_shop_location l
+        left join i_shop s
+        on l.shopId = s.shopId
+        where s.flag = 0
+        <if test="communityId!=null and communityId!=''">
+            and l.communityId = #{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(l.createdtime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(l.createdtime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+    </select>
+
+    <!-- 根据编号获取商户,小区关联数据 -->
+    <select id="getShopLocationByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.ShopLocation">
+        select * from i_shop_location where communityId = #{communityId} and shopId = #{shopId}
+    </select>
+
+    <!--
+         关联商户，小区记录
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.ShopLocation">
+        insert into i_shop_location(shopId,communityId,createdtime)
+        values(
+           #{shopId},
+           #{communityId},
+           NOW()
+        )
+    </insert>
+
+    <!--
+        根据参数删除记录
+    -->
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from i_shop_location where id = #{id}
+    </delete>
+
+</mapper>

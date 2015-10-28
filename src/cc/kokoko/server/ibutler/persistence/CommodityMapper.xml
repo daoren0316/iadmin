@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.CommodityMapper">
+
+
+    <select id="getCommodityList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Commodity">
+	SELECT 
+	   *
+	FROM 
+	   i_commodity 
+	WHERE 
+	   1
+	ORDER BY
+	 commodityId DESC
+	</select>
+
+    <select id="getLocalCommodityList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Commodity">
+	SELECT 
+	   *
+	FROM 
+	   i_commodity 
+	WHERE 
+	   communityId = #{communityId}
+	ORDER BY
+	 commodityId DESC
+	</select>
+
+
+    <select id="getCommodityById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Commodity">
+	SELECT 
+	   *
+	FROM 
+	   i_commodity 
+	WHERE 
+	   commodityId = #{commodityId}
+	</select>
+
+
+    <select id="getCommodityUserList" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.CommodityUser">
+	SELECT 
+	   *
+	FROM 
+	   i_commodity_apply 
+	WHERE 
+	   commodityId = #{commodityId}
+	</select>
+
+    <insert id="addCommodityUser" parameterType="cc.kokoko.server.ibutler.domain.CommodityUser">
+	INSERT INTO i_commodity_apply(uid, houseTitle, applyTime, amount, commodityId, phoneNumber)
+	VALUES(#{uid}, #{houseTitle}, #{applyTime}, #{amount}, #{commodityId}, #{phoneNumber})
+	</insert>
+
+    <update id="updateCommodityCount" parameterType="map">
+	UPDATE i_commodity SET saledAmount = saledAmount + #{amount} , applyCount = applyCount + #{applyCount}
+	WHERE commodityId = #{commodityId}
+	</update>
+
+    <!--
+        修改团购信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.Commodity">
+        update i_commodity
+        <set>
+            commodityTitle =#{commodityTitle},
+            commodityDesc =#{commodityDesc},
+            attachmentList =#{attachmentList},
+            price =#{price},
+            marketPrice =#{marketPrice},
+            startTime =#{startTime},
+            endTime =#{endTime},
+            titlePicUrl =#{titlePicUrl},
+            notice =#{notice},
+            amountLimit =#{amountLimit},
+            isAnytimeDawback =#{isAnytimeDawback},
+            isTimeoutDawback =#{isTimeoutDawback},
+            totalAmount =#{totalAmount}
+        </set>
+        where commodityId = #{commodityId}
+    </update>
+
+    <!--
+        添加团购信息
+    -->
+    <insert id="createCommodity" parameterType="cc.kokoko.server.ibutler.domain.Commodity">
+	INSERT INTO i_commodity( commodityTitle, commodityDesc, attachmentList, price, marketPrice, applyCount, postTime,
+	    startTime, endTime, uid, titlePicUrl, notice, amountLimit, isAnytimeDawback, isTimeoutDawback, saledAmount, communityId, totalAmount)
+	VALUES(
+	    #{commodityTitle} ,
+	    #{commodityDesc} ,
+	    #{attachmentList} ,
+	    #{price} ,
+	    #{marketPrice},
+	    #{applyCount},
+	    NOW(),
+	    #{startTime},
+	    #{endTime} ,
+	    #{uid},
+	    #{titlePicUrl},
+	    #{notice},
+	    #{amountLimit},
+	    #{isAnytimeDawback} ,
+	    #{isTimeoutDawback} ,
+	    #{saledAmount} ,
+	    #{communityId} ,
+	    #{totalAmount})
+	</insert>
+
+    <!--
+        根据编号删除团购信息
+    -->
+    <delete id="delCommodityById" parameterType="long">
+	    DELETE FROM  i_commodity WHERE commodityId = #{commodityId}
+	</delete>
+
+    <!--
+        获取团购信息
+    -->
+    <select id="getCommodityRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Commodity">
+        select * from i_commodity where uid=#{uid}
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY postTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取团购信息总条数
+    -->
+    <select id="getCommodityCount" parameterType="map" resultType="java.lang.Long">
+        select count(commodityId) from i_commodity where uid=#{uid}
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(postTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(postTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.TradeMapper">
+
+
+    <select id="getShopDiscountByShopId" parameterType="long" resultType="int">
+	select discount from i_shop where shopId = #{shopId} LIMIT 1
+	</select>
+
+    <select id="getShopIdByPosNo" parameterType="string" resultType="long">
+	select shopId from rd_pos where posNo = #{posNo} LIMIT 1
+	</select>
+
+    <select id="getShopIdByShopNo" parameterType="string" resultType="long">
+	select shopId from rd_pos where shopNo = #{shopNo} LIMIT 1
+	</select>
+
+    <insert id="createRDOrder" parameterType="cc.kokoko.server.ibutler.domain.RDOrder">
+     insert into rd_order (tradeId,uid,houseId, cardNo, status, postTime, shopId, posNo, posTradeNo, tradeTime, amount, tradeType, rawAmout)
+	values(
+	#{tradeId},
+	#{uid},
+	#{houseId},
+	#{cardNo},
+	#{status},
+	NOW(),
+	#{shopId},
+	#{posNo},
+	#{posTradeNo},
+	#{tradeTime},
+	#{amount},
+	#{tradeType},
+	#{rawAmout})
+	</insert>
+
+    <update id="updateRDOrder" parameterType="cc.kokoko.server.ibutler.domain.RDOrder">
+	UPDATE rd_order SET status = 1 WHERE tradeId = #{tradeId}
+	</update>
+
+    <select id="getRDOrderByTradeId" parameterType="string" resultType="cc.kokoko.server.ibutler.domain.RDOrder">
+	select * from rd_order where tradeId = #{tradeId} LIMIT 1
+	</select>
+
+
+</mapper>

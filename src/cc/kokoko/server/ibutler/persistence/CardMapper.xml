@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.CardMapper">
+    <!--
+         添加发卡记录
+     -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Card">
+          insert into rd_card (uid,houseId,cardNo,status,createdTime,updateTime,operatorId,operatorName)
+          values(
+             #{uid},
+             #{houseId},
+             #{cardNo},
+             #{status},
+             NOW(),
+             NOW(),
+             #{operatorId},
+             #{operatorName}
+          )
+    </insert>
+
+    <!--
+        添加卡绑定历史记录
+    -->
+    <insert id="insertCardDel" parameterType="map">
+         insert into rd_card_del(uid,cardNo,createdTime,operatorId,operatorName)
+         select uid,cardNo,NOW(),operatorId,operatorName from rd_card where uid=#{uid} and cardNo=#{cardNo}
+    </insert>
+
+    <!--
+        删除卡绑定记录
+    -->
+    <delete id="delete" parameterType="map">
+        delete from rd_card where uid=#{uid} and cardNo=#{cardNo}
+    </delete>
+
+    <!--
+        根据卡号获取卡绑定信息
+    -->
+    <select id="getCardByCardNo" parameterType="String" resultType="map">
+        select c.*,u.nickname,u.phoneNumber,u.publicAddress from rd_card c, i_user u
+        where c.uid=u.uid and c.cardNo=#{cardNo} LIMIT 1
+    </select>
+
+    <!--
+       根据用户编号获取卡绑定信息
+   -->
+    <select id="getCardByUid" parameterType="java.lang.Long" resultType="map">
+        select c.*,u.nickname,u.phoneNumber,u.publicAddress from rd_card c, i_user u
+        where c.uid=u.uid and c.uid=#{uid} LIMIT 1
+    </select>
+
+    <!--
+        根据手机号码获取卡号
+    -->
+    <select id="getCardByPhoneNumber" parameterType="String" resultType="cc.kokoko.server.ibutler.domain.Card">
+         select rd.* from rd_card rd,i_user u where rd.uid = u.uid and u.phoneNumber = #{phoneNumber} LIMIT 1
+    </select>
+
+    <!--
+        获取发卡信息
+    -->
+    <select id="getCardRecordByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Card">
+        select rd.cardNo,(select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId and c.cityId =city.cityId and h.houseId=m.houseId ) publicAddress ,
+        u.phoneNumber, rd.createdTime ,rd.operatorId ,rd.operatorName
+        from rd_card rd LEFT JOIN i_house m on rd.houseId = m.houseId
+        LEFT JOIN i_user u on u.uid=rd.uid
+        where 1=1
+        <if test="communityId!=null and communityId!=''">
+           and m.communityId = #{communityId}
+        </if>
+        <if test="cardNo!=null and cardNo!='' ">
+            and rd.cardNo = #{cardNo}
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0">
+            and m.houseId=#{houseId}
+        </if>
+        ORDER BY rd.createdTime desc LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取发卡信息总条数
+    -->
+    <select id="getCardCountByParam" parameterType="map" resultType="java.lang.Long">
+        select count(rd.id)
+        from rd_card rd LEFT JOIN i_house m on rd.houseId = m.houseId
+        LEFT JOIN i_user u on u.uid=rd.uid
+        where 1=1
+        <if test="communityId!=null and communityId!=''">
+            and m.communityId = #{communityId}
+        </if>
+        <if test="cardNo!=null and cardNo!='' ">
+            and rd.cardNo = #{cardNo}
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0">
+            and m.houseId=#{houseId}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.RemittanceMapper">
+    <!--
+      记录打款信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Remittance">
+        <selectKey keyProperty="id" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_remittance_log(money,initTime,shopId,startTime,endTime,note)
+        values (
+        #{money},
+        NOW(),
+        #{shopId},
+        #{startTime},
+        #{endTime},
+        #{note}
+        )
+    </insert>
+
+    <!--
+     获取打款记录
+    -->
+    <select id="getRemittanceRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Remittance">
+        select r.*,s.shopName,s.phoneNumber from i_remittance_log r
+        LEFT JOIN i_shop s on r.shopId = s.shopId
+        where 1=1
+        <if test="shopId!=null">
+            and r.shopId = #{shopId}
+        </if>
+        <if test="startTime!=null and startTime!='' ">
+            and r.initTime >= #{startTime}
+        </if>
+        <if test="endTime!=null and endTime!='' ">
+            <![CDATA[ and r.initTime <= #{endTime}  ]]>
+        </if>
+        ORDER BY r.initTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+     获取打款记录
+    -->
+    <select id="getRemittanceRecordDTO" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.dto.RemittanceDTO">
+        select id,money,initTime time,startTime,endTime from i_remittance_log
+          where shopId = #{shopId}
+        ORDER BY initTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+     获取打款记录总条数
+    -->
+    <select id="getRemittanceCount" parameterType="map" resultType="java.lang.Long">
+        select count(r.id) from i_remittance_log r
+        LEFT JOIN i_shop s on r.shopId = s.shopId
+        where 1=1
+        <if test="shopId!=null">
+            and r.shopId = #{shopId}
+        </if>
+        <if test="startTime!=null and startTime!='' ">
+            and r.startTime >= #{startTime}
+        </if>
+        <if test="endTime!=null and endTime!='' ">
+            <![CDATA[ and r.endTime <= #{endTime}  ]]>
+        </if>
+        ORDER BY r.initTime DESC
+    </select>
+
+    <!--
+        获取已打款总金额
+    -->
+    <select id="getRemittanceTotal" parameterType="map" resultType="java.lang.Double">
+         select SUM(money) from i_remittance_log where shopId = #{shopId}
+    </select>
+
+</mapper>

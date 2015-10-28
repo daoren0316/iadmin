@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.AttachmentMapper">
+
+	
+	<insert id="createAttachment" parameterType="cc.kokoko.server.ibutler.domain.Attachment">
+		INSERT  INTO i_attachment(attId, filePath, attSize, uid,
+		postTime, fileName)
+		VALUES
+		(#{attId},
+		#{filePath},
+		#{attSize},
+		#{uid},
+		 NOW(),
+		 #{fileName})
+	</insert>
+	
+	
+</mapper>

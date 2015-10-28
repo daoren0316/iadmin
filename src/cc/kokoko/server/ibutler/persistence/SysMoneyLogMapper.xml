@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.SysMoneyLogMapper">
+
+    <!--
+        添加系统资金账户信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.SysMoney">
+        insert into sys_money(money,updateTime)
+        values (
+            #{money},
+            NOW()
+        )
+    </insert>
+
+    <!--
+        修改系统资金账户信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.SysMoney">
+          update sys_money
+          set
+            money = #{money},
+            updateTime=NOW()
+          where id = #{id}
+    </update>
+
+    <!--
+         获取系统资金账户信息
+     -->
+    <select id="loadSysMoney" resultType="cc.kokoko.server.ibutler.domain.SysMoney">
+        select * from sys_money ORDER BY id ASC LIMIT 1
+    </select>
+
+    <!--
+         添加系统资金变动记录
+     -->
+    <insert id="insertMoneyLog" parameterType="cc.kokoko.server.ibutler.domain.SysMoneyLog">
+         insert into sys_money_log(money,type,orderId,createdTime,note)
+         values (
+            #{money},
+            #{type},
+            #{orderId},
+            NOW(),
+            #{note}
+         )
+    </insert>
+
+    <!--
+        获取系统资金变更记录
+    -->
+    <select id="getSysMoneyRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.SysMoneyLog">
+        select sml.*,s.siteName from sys_money_log sml left join i_site s on sml.siteId = s.siteId
+        where sml.type = 0
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(sml.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(sml.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY sml.createdTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取系统资金变更记录
+    -->
+    <select id="getSysMoneyCount" parameterType="map" resultType="java.lang.Long">
+        select count(sml.id) from sys_money_log sml
+        where sml.type = 0
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(sml.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(sml.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY sml.createdTime DESC
+    </select>
+
+    <!--
+        添加订单记录
+    -->
+    <insert id="insertOrderAccount" parameterType="cc.kokoko.server.ibutler.domain.OrderAccount">
+          insert into i_order_account(orderId,tn,amount,orderType,orderStatus,uid,houseId,createdTime,updateTime,note,operatorId,operatorName)
+          values (
+              #{orderId},
+              #{tn},
+              #{amount},
+              #{orderType},
+              #{orderStatus},
+              #{uid},
+              #{houseId},
+              NOW(),
+              NOW(),
+              #{note},
+              #{operatorId},
+              #{operatorName}
+          )
+    </insert>
+
+    <!--
+        根据订单号获取订单信息
+    -->
+    <select id="getOrderAccountByOrderId" parameterType="string"
+            resultType="cc.kokoko.server.ibutler.domain.OrderAccount">
+          select * from i_order_account where orderId=#{orderId}
+    </select>
+
+    <!--
+        根据订单编号修改订单状态
+    -->
+    <update id="updateOrderStatus" parameterType="map">
+        update i_order_account
+        <set>
+            orderStatus = #{orderStatus},
+            updateTime = NOW(),
+            note = #{note}
+        </set>
+        where orderId = #{orderId}
+    </update>
+
+    <!--
+        获取充值订单记录
+    -->
+    <select id="getOrderAccountRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.OrderAccount">
+         select ioa.*,
+             (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle)
+             from i_house h,i_community c,i_city city
+             where h.communityId=c.communityId
+             and c.cityId =city.cityId
+             and h.houseId=ioa.houseId) publicAddress,u.phoneNumber,
+            (SELECT communityName FROM i_community where communityId=u.communityId) communityName
+         from i_order_account ioa,i_user u
+         where ioa.uid=u.uid and ioa.orderType in (2,3,4)
+        <if test="communityId!=null and communityId!=''">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(ioa.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(ioa.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0 ">
+            and ioa.houseId=#{houseId}
+        </if>
+        ORDER BY ioa.createdTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取充值订单记录总条数
+    -->
+    <select id="getOrderAccountCount" parameterType="map" resultType="java.lang.Long">
+        select count(ioa.id)
+        from i_order_account ioa,i_user u
+        where ioa.uid=u.uid and ioa.orderType in (2,3,4)
+        <if test="communityId!=null and communityId!=''">
+            and u.communityId=#{communityId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(ioa.createdTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(ioa.createdTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="phoneNumber!=null and phoneNumber!='' ">
+            and u.phoneNumber = #{phoneNumber}
+        </if>
+        <if test="houseId>0 ">
+            and ioa.houseId=#{houseId}
+        </if>
+    </select>
+
+</mapper>

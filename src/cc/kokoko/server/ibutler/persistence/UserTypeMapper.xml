@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.UserTypeMapper">
+
+    <!--
+        添加用户类型信息
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.UserType">
+        <selectKey keyProperty="typeId" resultType="java.lang.Long">
+            SELECT @@IDENTITY as value
+        </selectKey>
+        insert into i_usertype(typeFlag,typeName)
+        values (
+        #{typeFlag},
+        #{typeName}
+        )
+    </insert>
+
+    <!--
+        添加用户，角色关联信息
+    -->
+    <insert id="insertUserRole" parameterType="cc.kokoko.server.ibutler.domain.UserRole">
+        insert into i_user_role(roleId,typeId)
+        values (
+        #{roleId},
+        #{typeId}
+        )
+    </insert>
+
+    <!--
+        修改用户类型信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.UserType">
+        update i_usertype
+        <set>
+            typeFlag = #{typeFlag},
+            typeName = #{typeName}
+        </set>
+        where typeId = #{typeId} LIMIT 1
+    </update>
+
+    <!--
+        获取用户类型数据
+    -->
+    <select id="getUserTypeById" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserType">
+        select * from  i_usertype where typeId = #{typeId} LIMIT 1
+    </select>
+
+    <!--
+        获取用户类型数据
+    -->
+    <select id="getUserTypeRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserType">
+        select * from i_usertype
+        ORDER BY typeId  ASC  LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取用户类型总条数
+    -->
+    <select id="getUserTypeCount" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserType">
+        select count(typeId) from i_usertype
+    </select>
+
+    <!--
+        检测用户类型名称是否存在
+    -->
+    <select id="checkTypeName" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserType">
+        select * from i_usertype where typeName = #{typeName}
+        <if test="typeId!=null">
+            and typeId != #{typeId}
+        </if>
+    </select>
+
+    <!--
+        检测用户类型标识是否存在
+    -->
+    <select id="checkTypeFlag" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserType">
+       select * from i_usertype where typeFlag = #{typeFlag}
+        <if test="typeId!=null">
+            and typeId != #{typeId}
+        </if>
+    </select>
+
+    <!--
+        根据参数获取已有的角色信息
+    -->
+    <select id="getUserRoleByParam" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.UserRole">
+        select * from i_user_role where typeId = #{typeId}
+    </select>
+
+    <!--
+        删除用户，角色关联信息
+    -->
+    <delete id="deleteUserRole" parameterType="map">
+        delete from  i_user_role where roleId = #{roleId} and typeId = #{typeId}
+    </delete>
+
+
+</mapper>

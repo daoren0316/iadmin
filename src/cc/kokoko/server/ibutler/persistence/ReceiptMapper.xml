@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.ReceiptMapper">
+
+    <!--
+    修改打款信息
+    -->
+    <update id="update" parameterType="map">
+        update i_receipt_account
+        <set>
+            flag = #{flag},
+            receiptMoney = money,
+            surplusMoney = 0,
+            receiptTime = NOW()
+        </set>
+        where shopId = #{shopId}
+        and flag=1
+        and DATE(createTime) BETWEEN DATE(#{startTime}) AND DATE(#{endTime})
+    </update>
+
+    <!--
+       获取打款记录
+    -->
+    <select id="getReceiptList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.dto.ReceiptAccountDTO">
+        SELECT ra.id,ra.createTime time,ra.money,
+                (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle)
+                from i_house h,i_community c,i_city city
+                where h.communityId=c.communityId
+                and c.cityId =city.cityId
+                and h.houseId=rd.houseId) publicAddress,ra.note
+        FROM i_receipt_account ra,rd_order rd
+        where ra.tradeId = rd.tradeId and ra.flag=#{flag} and ra.shopId=#{shopId}
+        <if test="startTime!=null and endTime!=null">
+            and DATE(ra.createTime) BETWEEN DATE(#{startTime}) AND DATE(#{endTime})
+        </if>
+        order by ra.createTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        根据编号获取打款详细
+    -->
+    <select id="getReceiptDetail" parameterType="Long" resultType="cc.kokoko.server.ibutler.domain.ReceiptAccount">
+        select * from i_receipt_account where id=#{id}
+    </select>
+
+    <insert id="createReceiptAccount" parameterType="cc.kokoko.server.ibutler.domain.ReceiptAccount">
+    INSERT INTO i_receipt_account(flag, createTime, money, receiptMoney, surplusMoney, publicAddress, shopId, tradeId, note)
+    VALUES(#{flag}, NOW(), #{money}, #{receiptMoney}, #{surplusMoney}, #{publicAddress}, #{shopId}, #{tradeId}, #{note})
+    </insert>
+
+    <delete id="deleteReceiptAccountByTradeId" parameterType="string">
+    delete from i_receipt_account where tradeId= #{tradeId}
+    </delete>
+
+    <!--
+     根据参数获取打款金额
+    -->
+    <select id="getReceiptMoneyByParam" parameterType="map" resultType="java.lang.Double">
+       select (
+          CASE
+              WHEN SUM(money) is null
+                  then 0
+              else
+                  SUM(money)
+              end) money
+       from i_receipt_account
+       where flag=1
+           and shopId = #{shopId}
+           and DATE(createTime) BETWEEN DATE(#{startTime}) AND DATE(#{endTime})
+    </select>
+
+    <!--
+        获取交易记录
+    -->
+    <select id="getRecepitAccountRecord" parameterType="map"
+            resultType="cc.kokoko.server.ibutler.domain.ReceiptAccount">
+        SELECT r.tradeId,r.createTime,r.money,
+        (select CONCAT(city.cityName,c.communityName,' ',h.houseTitle) address
+        from i_house h,i_community c,i_city city
+        where h.communityId=c.communityId
+        and c.cityId =city.cityId
+        and h.houseId=ml.houseId) publicAddress,
+        r.flag,
+        s.shopName,
+        s.shopAddress
+        FROM i_receipt_account r,i_money_log ml,i_shop_location sl LEFT JOIN i_shop s on sl.shopId=s.shopId
+        where r.shopId = sl.shopId and r.tradeId = ml.orderId
+        <if test="communityId!=null and communityId!='' ">
+            and sl.communityId =#{communityId}
+        </if>
+        <if test="flag!=null">
+            and r.flag=#{flag}
+        </if>
+        <if test="shopId!=null">
+            and r.shopId=#{shopId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(r.createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(r.createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and ml.houseId=#{houseId}
+        </if>
+        ORDER BY r.createTime DESC
+        <if test="start!=null and pagesize!=null">
+            LIMIT #{start}, #{pagesize}
+        </if>
+    </select>
+
+    <!--
+        获取交易记录总条数
+    -->
+    <select id="getRecepitAccountCount" parameterType="map" resultType="java.lang.Long">
+        SELECT count(r.id)
+        FROM i_receipt_account r,i_money_log ml,i_shop_location sl LEFT JOIN i_shop s on sl.shopId=s.shopId
+        where r.shopId = sl.shopId and r.tradeId = ml.orderId
+        <if test="communityId!=null and communityId!='' ">
+            and sl.communityId =#{communityId}
+        </if>
+        <if test="flag!=null">
+            and r.flag=#{flag}
+        </if>
+        <if test="shopId!=null">
+            and r.shopId=#{shopId}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(r.createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(r.createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        <if test="houseId>0 ">
+            and ml.houseId=#{houseId}
+        </if>
+    </select>
+
+    <!--
+        计算每页交易的总和
+    -->
+    <select id="getRecepitAccountTotal" parameterType="map" resultType="java.lang.Double">
+        select sum(money) from i_receipt_account where shopId=#{shopId}
+        <if test="flag!=null">
+            and flag=#{flag}
+        </if>
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+        ORDER BY createTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取交易总金额
+    -->
+    <select id="getRecepitTotal" parameterType="map" resultType="java.lang.Double">
+        SELECT SUM(money) FROM i_receipt_account
+        where flag=#{flag} and shopId=#{shopId}
+        <if test="starttime!=null and starttime!='' ">
+            and DATE(createTime) <![CDATA[ >= ]]> DATE(#{starttime})
+        </if>
+        <if test="endtime!=null and endtime!='' ">
+            and DATE(createTime) <![CDATA[ <= ]]>DATE(#{endtime})
+        </if>
+    </select>
+
+    <!--
+        获取商户应收款金额
+    -->
+    <select id="getReceiptTotalByParam" parameterType="map" resultType="java.lang.Double">
+        SELECT SUM(money) FROM i_receipt_account where 1=1
+        <if test="flag>=0">
+            and flag = #{flag}
+        </if>
+    </select>
+
+</mapper>

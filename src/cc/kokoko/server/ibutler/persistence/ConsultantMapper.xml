@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.ConsultantMapper">
+
+    <!--
+        添加生活顾问
+    -->
+    <insert id="insert" parameterType="cc.kokoko.server.ibutler.domain.Consultant">
+        insert into i_consultant(consultantId,consultantName,avatarUrl,consultantType,signature,publicAddress,distance,communityId,duty,consultantDesc)
+        values (
+            #{consultantId},
+            #{consultantName},
+            #{avatarUrl},
+            #{consultantType},
+            #{signature},
+            #{publicAddress},
+            #{distance},
+            #{communityId},
+            #{duty},
+            #{consultantDesc}
+        )
+    </insert>
+
+    <!--
+        获取生活顾问信息
+    -->
+    <select id="getConsultantRecord" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Consultant">
+        select c.*,u.phoneNumber from i_consultant c
+        left join i_user u on c.consultantId = u.uid
+        where c.communityId = #{communityId}
+        <if test="communityName!=null and communityName!=''">
+            and c.consultantName like CONCAT('%',#{communityName},'%')
+        </if>
+        ORDER BY c.consultantId ASC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+        获取生活顾问信息总条数
+    -->
+    <select id="getConsultantCount" parameterType="map" resultType="java.lang.Long">
+        select count(consultantId) from i_consultant where communityId = #{communityId}
+        <if test="communityName!=null and communityName!=''">
+            and consultantName like CONCAT('%',#{communityName},'%')
+        </if>
+    </select>
+
+    <!--
+        获取生活顾问详细信息
+    -->
+    <select id="getConsultantById" parameterType="long" resultType="cc.kokoko.server.ibutler.domain.Consultant">
+         select * from i_consultant where consultantId=#{consultantId} LIMIT 1
+    </select>
+
+    <!--
+        修改生活顾问信息
+    -->
+    <update id="update" parameterType="cc.kokoko.server.ibutler.domain.Consultant">
+        update i_consultant
+        <set>
+            <if test="consultantName != null">consultantName=#{consultantName},</if>
+            <if test="avatarUrl != null">avatarUrl=#{avatarUrl},</if>
+            <if test="publicAddress != null">publicAddress=#{publicAddress},</if>
+            <if test="signature != null">signature=#{signature},</if>
+            <if test="distance != null">distance=#{distance},</if>
+            <if test="duty != null">duty=#{duty},</if>
+            <if test="consultantDesc != null">consultantDesc=#{consultantDesc}</if>
+        </set>
+        WHERE consultantId=#{consultantId}
+    </update>
+
+    <!--
+        删除生活顾问
+    -->
+    <delete id="delete" parameterType="java.lang.Long">
+          delete from i_consultant where consultantId=#{consultantId}
+    </delete>
+
+</mapper>

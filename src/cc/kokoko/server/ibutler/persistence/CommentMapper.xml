@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.CommentMapper">
+
+	<resultMap type="cc.kokoko.server.ibutler.domain.kdt.LifeComment" id="BaseResultMap">
+		<result column="lid" property="lid"/>
+		<result column="content" property="content"/>
+		<result column="cdate" property="cdate"/>
+	</resultMap>
+	
+	
+	<select id="selectByLid" parameterType="long" resultMap="BaseResultMap">
+		select * from i_comment where lid= #{lid} order by cdate DESC
+	</select>
+	
+	<insert id="insertComment" parameterType="cc.kokoko.server.ibutler.domain.kdt.LifeComment">
+		insert into i_comment (lid,content,cdate) values
+		(#{lid},#{content},now())
+	</insert>
+	
+	
+</mapper>

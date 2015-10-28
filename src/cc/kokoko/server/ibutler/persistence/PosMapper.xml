@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.PosMapper">
+
+    <!--
+     获取已绑定pos机记录
+    -->
+    <select id="getPosList" parameterType="map" resultType="cc.kokoko.server.ibutler.domain.Pos">
+        select p.*,s.shopName,
+        (SELECT communityName FROM i_community where communityId=s.communityId) communityName
+        from rd_pos p, i_shop s where p.shopId = s.shopId
+        <if test="communityId!=null and communityId!=''">
+            and s.communityId = #{communityId}
+        </if>
+        <if test="posNo!=null and posNo!='' ">
+            and p.posNo = #{posNo}
+        </if>
+        ORDER BY p.createTime DESC LIMIT #{start}, #{pagesize}
+    </select>
+
+    <!--
+     获取已绑定pos机总条数
+    -->
+    <select id="getPosCount" parameterType="map" resultType="java.lang.Long">
+        select count(p.shopId) from rd_pos p, i_shop s where p.shopId = s.shopId
+        <if test="communityId!=null and communityId!=''">
+            and s.communityId = #{communityId}
+        </if>
+        <if test="posNo!=null and posNo!='' ">
+            and p.posNo = #{posNo}
+        </if>
+        ORDER BY p.createTime DESC
+    </select>
+
+    <!--
+     为商户绑定pos信息
+    -->
+    <insert id="insertPos" parameterType="cc.kokoko.server.ibutler.domain.Pos">
+         insert into rd_pos(shopId,posNo,shopNo,createTime)
+          values(
+          #{shopId},
+          #{posNo},
+          #{shopNo},
+          NOW())
+    </insert>
+
+    <!--
+     修改商户绑定的pos信息
+    -->
+    <update id="updatePos" parameterType="cc.kokoko.server.ibutler.domain.Pos">
+        update
+        rd_pos
+        <set>
+            <if test="shopId!=null and shopId!=''">
+                shopId = #{shopId},
+            </if>
+            <if test="shopNo!=null and shopNo!=''">
+                shopNo = #{shopNo}
+            </if>
+        </set>
+        where
+        posNo = #{posNo} LIMIT 1
+    </update>
+
+    <!--
+     根据商户编号获取pos绑定信息
+    -->
+    <select id="getOnePos" parameterType="java.lang.Long" resultType="cc.kokoko.server.ibutler.domain.Pos">
+       select p.*,s.shopName from rd_pos p, i_shop s where p.shopId = s.shopId and p.shopId = #{shopId}  LIMIT 1
+    </select>
+
+    <!--
+      根据pos机编号获取绑定信息
+    -->
+    <select id="getOneByPosNo" parameterType="java.lang.String" resultType="cc.kokoko.server.ibutler.domain.Pos">
+       select p.*,s.shopName from rd_pos p, i_shop s where p.shopId = s.shopId and p.posNo = #{posNo}  LIMIT 1
+    </select>
+
+    <!--
+        根据POS机编号删除POS机绑定信息
+    -->
+    <delete id="deletePos" parameterType="cc.kokoko.server.ibutler.domain.Pos">
+        delete from rd_pos where posNo = #{posNo}
+    </delete>
+
+</mapper>

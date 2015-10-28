@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cc.kokoko.server.ibutler.persistence.PraiseMapper">
+
+	<insert id="insertPraise" parameterType="cc.kokoko.server.ibutler.domain.kdt.Praise">
+		insert into i_praise_count(id, pcount)
+		values(#{id}, #{pcount})
+	</insert>
+	
+	 <update id="updatePraise" parameterType="long">
+        update i_praise_count
+        <set>
+            pcount = pcount + 1,
+        </set>
+        where id = #{id}
+    </update>
+    
+    <select id="selectPraiseById" parameterType="int" resultType="long">
+    	select pcount from i_praise_count where id=#{id}
+    </select>
+
+</mapper>
